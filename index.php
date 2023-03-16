@@ -314,7 +314,7 @@
 			else $dateLimitYear = $dateTodayPieces[0]; 
 			
 			// On manipule les mois
-			if($dateTodayPieces[1] >= $dateDebloquante ) { $dateLimitMonth = $dateTodayPieces[1] + 1 + $dateDebloLimit ;} // Si on est le $dateDebloquante du mois, on décale au mois suivant
+			if($dateTodayPieces[2] >= $dateDebloquante ) { $dateLimitMonth = $dateTodayPieces[1] + 1 + $dateDebloLimit ;} // Si on est le $dateDebloquante du mois, on décale au mois suivant
 			else { $dateLimitMonth = $dateTodayPieces[1] + $dateDebloLimit ;}
 			
 			$dateLimitMonthHuman = $monthHuman[ $dateLimitMonth - 2 ];
