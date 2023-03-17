@@ -203,12 +203,11 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 			{foreach $dateDisplay as $card}
 				{$inscFull=$card.participantsMax - count($card.listInscrits)}
 			<div class="card {$card.class}">
-							<div class="cell date">{$card.date}</div>
+							<div class="cell date"><span class="date-first-line"><span class="date-jour-type">{$card.jour}</span>{if $card.animateur} avec {$card.animateur}{/if}</span><br/><span class="date-second-line"><span class="date-jour">{$card.dateJour}</span> <span class="date-mois">{$card.mois}</span> <span class="date-annee">{$card.annee}</span> de <span class="date-heure">{$card.heureDebut} à {$card.heureFin}<span></span></div>
 							<div class="cell inscrits">
+							{foreach $card.listInscrits as $inscrit}{if $card.inscMe && $inscrit@first}<b>{$inscrit}</b>{else}{$inscrit}{/if}{if not $inscrit@last},  {/if}{foreachelse}Créneau ouvert{/foreach}
 							
-							{foreach $card.listInscrits as $inscrit}{if $card.inscMe}<b>{$inscrit} | </b>{else}{$inscrit}{/if} {foreachelse}Créneau ouvert{/foreach}
-							
-							{if $card.listAttenteInscrits}<br/><span>Liste attente ({count($card.listAttenteInscrits)}) : {foreach $card.listAttenteInscrits as $inscrit}{if $card.inscMe}<b>{$inscrit} | </b>{else}{$inscrit}{/if} {/foreach}</span>{/if}
+							{if $card.listAttenteInscrits}<br/><span>Liste attente ({count($card.listAttenteInscrits)}) : {foreach $card.listAttenteInscrits as $wlInscrit}{if $card.inscMe}<b>{$wlInscrit} | </b>{else}{$wlInscrit}{/if}{/foreach}</span>{/if}
 							
 							</div>
 							<div class="cell places">{$inscFull}/{$card.participantsMax}<br/> <span class="text-places-restantes">places restantes</span></div>

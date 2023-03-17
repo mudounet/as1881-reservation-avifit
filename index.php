@@ -597,7 +597,6 @@ foreach ($dates as $k) {
     $kp = explode("-", $k); // On explose la date pour pouvoir manipuler le contenu - 0 = type jour, 1 = année, 2 = mois, 3 = jour
     $kp2Trim = $kp[2] - 1; // On enleve 1 pour tomber sur l'array
     $dayFr = $dayHuman[$kp[0]];
-    $monthFr = $monthHuman[$kp2Trim];
 
     if ($arraySeances[$dayFr] != "") {
         // Si le jour correspond à l'array du début, alors on affiche une ligne
@@ -607,45 +606,14 @@ foreach ($dates as $k) {
         foreach ($listSeanceDuJour as $i) {
             // On formate la date en un truc pas trop moche
             $iHuman = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-            $animateurDuJour = $arrayAnimateur[$dayFr]; // On détermine l'animateur du jour
-            $inscMe = false; // On remet à false le fait d'être inscrit
-            $dateHuman =
-                '<span class="date-first-line"><span class="date-jour-type">' .
-                $dayFr .
-                "</span> " .
-                ($animateurDuJour != "" ? "avec $animateurDuJour" : "") .
-                ' </span><br/><span class="date-second-line"> <span class="date-jour">' .
-                $kp[3] .
-                '</span> <span class="date-mois">' .
-                $monthFr .
-                '</span> <span class="date-annee">' .
-                $kp[1] .
-                '</span> à <span class="date-heure">' .
-                $iHuman .
-                "<span></span>"; // On transforme la date
 
             // On récupère les inscrits et les gens de la waiting list
             $dateXmlQuery = $kp[1] . "-" . $kp[2] . "-" . $kp[3] . "-" . $i; // Je reconstruit la date
 
             // Gestion des inscrits
-            $xml_query = $xml->xpath("//insc[@date= '$dateXmlQuery' ]"); // On query uniquement le xml pour la date demandée
-            $i_inscrits = 0; // On met un i aux inscrits pour pouvoir les compter
             $listInscrits = []; // On reset la liste des inscrit
-
-            // Gestion de la waiting list
-            $wl_count_query = $wl->xpath("//wl[@date= '$dateXmlQuery']"); // On query uniquement le xml pour la date demandée
-            $wl_query = $wl->xpath(
-                "//wl[@date= '$dateXmlQuery' and @name='$GP_name' and @email='$GP_email']"
-            ); // On query uniquement le xml pour la date demandée
-            $wlInscrits = []; // On reset la waiting list au cas où
-            if (count($wl_query) > 0) {
-                $wlMe = true;
-            } else {
-                $wlMe = false;
-            } // Si on est présent dans la waiting list, on indique que le statut "wlMe" est true,sinon, on est en false
-
-            // On commence la boucle, pour chaque entrée
-            foreach ($xml_query as $q) {
+            $inscMe = false; // On remet à false le fait d'être inscrit
+            foreach ($xml->xpath("//insc[@date= '$dateXmlQuery' ]") as $q) { // On query uniquement le xml pour la date demandée
                 if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
                     array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
                     $inscMe = true;
@@ -654,10 +622,13 @@ foreach ($dates as $k) {
                 }
             }
 
-            // On détermine la liste des gens en waiting list... à voir si on le garde
-            foreach ($wl_count_query as $r) {
+            // Gestion de la waiting list
+            $wlInscrits = []; // On reset la waiting list au cas où
+            $wlMe = false;
+            foreach ($wl->xpath("//wl[@date= '$dateXmlQuery']") as $q) { // On query uniquement le xml pour la date demandée
                 if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-                    array_unshift($wlInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+					// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
+                    array_unshift($wlInscrits, $q["name"]); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
                     $wlMe = true;
                 } else {
                     array_push($wlInscrits, $q["name"]);
@@ -674,7 +645,13 @@ foreach ($dates as $k) {
             $kId++;
             $card = [
                 "class" => $cardCssDisplay . " " . $dayFr . "" . $iHuman,
-                "date" => $dateHuman,
+				"jour" => $dayFr,
+				"dateJour" => $kp[3],
+				"mois" => $monthHuman[$kp2Trim],
+				"annee" => $kp[1],
+				"heureDebut" => $iHuman,
+				"heureFin" => $iHuman,
+                "animateur" => $arrayAnimateur[$dayFr],
                 "listInscrits" => $listInscrits,
                 "listAttenteInscrits" => $wlInscrits,
                 "participantsMax" => $participantsMax,
