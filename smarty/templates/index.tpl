@@ -196,29 +196,27 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 
 {foreach $listFilters as $filter}<a href="{$filter.url}" class="{$filter.class}">{$filter.text}</a>{/foreach}
 {if $listFiltersI > 0}<a href="{$myURL}" >Réinitialiser les filtres</a>{/if}</div>
-				</div>
-				<!----
-				<div class="card">
-					<div class="cell date">Date</div>
-					<div class="cell animateur">Animateur</div>
-					<div class="cell inscrits">Liste des participants</div>
-					<div class="cell check"></div>
 				</div>	
-				-->			
 			</div>			
 			
 			<div class="inscription-passe">
 			{foreach $dateDisplay as $card}
-			
+				{$inscFull=$card.participantsMax - count($card.listInscrits)}
 			<div class="card {$card.class}">
 							<div class="cell date">{$card.date}</div>
-							<div class="cell inscrits">{$card.inscrits}</div>
-							<div class="cell places">{$card.placesRestantes}<br/> <span class="text-places-restantes">places restantes</span></div>
+							<div class="cell inscrits">
+							
+							{foreach $card.listInscrits as $inscrit}{if $card.inscMe}<b>{$inscrit} | </b>{else}{$inscrit}{/if} {foreachelse}Créneau ouvert{/foreach}
+							
+							{if $card.listAttenteInscrits}<br/><span>Liste attente ({count($card.listAttenteInscrits)}) : {foreach $card.listAttenteInscrits as $inscrit}{if $card.inscMe}<b>{$inscrit} | </b>{else}{$inscrit}{/if} {/foreach}</span>{/if}
+							
+							</div>
+							<div class="cell places">{$inscFull}/{$card.participantsMax}<br/> <span class="text-places-restantes">places restantes</span></div>
 							<div class="cell check">{if $GP_name}
 								<a href="{$card.urlPrefix}&date={$card.dateXmlQuery}&act=
-								{if	$card.inscFull and not $card.inscMe and not $card.wlMe}waitingListAdd#anchor-form" class="insc-listeattente">S'inscrire sur <br/>Liste d'attente<br/> ({$card.wl_nbr_inscrits} en attente)</a>
-								{elseif	$card.inscFull and not $card.inscMe and $card.wlMe}waitingListRemove#anchor-form" class="insc-listeattente-me">Se retirer de <br/>Liste d'attente<br/> ({$card.wl_nbr_inscrits} en attente)</a>								
+								{if	$card.wlMe}waitingListRemove#anchor-form" class="insc-listeattente-me">Se retirer de <br/>Liste d'attente</a>
 								{elseif	$card.inscMe}remove#anchor-form" class="insc-desinsc">Se désinscrire</a>
+								{elseif	$inscFull <= 0}waitingListAdd#anchor-form" class="insc-listeattente">S'inscrire sur <br/>Liste d'attente</a>
 								{else}add#anchor-form" class="insc-insc">S'inscrire</a>
 								{/if}
 							{else}&nbsp;

@@ -391,63 +391,47 @@ foreach($arraySeances as $as => $ask) {
 					// Gestion des inscrits 
 					$xml_query 		= $xml->xpath("//insc[@date= '$dateXmlQuery' ]"); // On query uniquement le xml pour la date demandée
 					$i_inscrits		= 0 ; // On met un i aux inscrits pour pouvoir les compter
-					$listInscrits 	= ""; // On reset la liste des inscrit
+					$listInscrits 	= array(); // On reset la liste des inscrit
 					
 					// Gestion de la waiting list
 					$wl_count_query	= $wl->xpath("//wl[@date= '$dateXmlQuery']"); // On query uniquement le xml pour la date demandée
-					$wl_query 		= $wl->xpath("//wl[@date= '$dateXmlQuery' and @name='$GP_name' and @email='$GP_email']"); // On query uniquement le xml pour la date demandée
-					$wl_nbr_inscrits	= count($wl_count_query);					
-					$wlInscrits		= ""; // On reset la waiting list au cas où
-					$listInscritsMe	= ""; // On reset le fait d'être inscrit
+					$wl_query 		= $wl->xpath("//wl[@date= '$dateXmlQuery' and @name='$GP_name' and @email='$GP_email']"); // On query uniquement le xml pour la date demandée				
+					$wlInscrits = array(); // On reset la waiting list au cas où
 					if(count($wl_query) > 0) $wlMe = true ; else $wlMe = false ; // Si on est présent dans la waiting list, on indique que le statut "wlMe" est true,sinon, on est en false		
 				
 				// On commence la boucle, pour chaque entrée
-				foreach($xml_query as $q) {		
-					if($q["name"] == $GP_name && $q["email"] == $GP_email) 	{ // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
-							$listInscritsMe = '<span class="cmoi"> '.$q["name"] .'</span> | '; 
-							$inscMe = true ; 
-						}
-					else {
-						if($isAdmin == true) $listInscrits .= '<a href="'.$myURL.'&act=adminRemove&targetName='.$q["name"].'&targetEmail='.$q["email"].'&date='.$q["date"].'">';
-						$listInscrits .= '<span class="inscrit">'.$q["name"] .'</span> '; // Sinon, on affiche juste les noms des inscrits							
-						if($isAdmin == true) $listInscrits .= '</a>';			
+				foreach($xml_query as $q) {
+					if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+						array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+						$inscMe = true;
 					}
-					$i_inscrits++; // On incrémente le nombre d'inscrits
-					}
-				$listInscrits = $listInscritsMe.' '.$listInscrits ; // Pour que ca soit plus lisible, je mets l'inscription en début de liste
+					else
+						array_push($listInscrits, $q["name"]);		
+				}
 					
 				// On détermine la liste des gens en waiting list... à voir si on le garde
-				if($wl_nbr_inscrits >> 0) {
-					$wlInscrits = '<br/><span class="waitingListIntro">Liste d\'attente ('. $wl_nbr_inscrits .') :';  
 					foreach($wl_count_query as $r) {
-						$wlInscrits .= $r['name'].' ';
+						if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+							array_unshift($wlInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+							$wlMe = true;
+						}
+						else
+							array_push($wlInscrits, $q["name"]);		
 					}
-					$wlInscrits .= '</span>';
-					}
-				
-				// On compte le nombre de participants
-				$nbrPlacesRestantes = $participantsMax - $i_inscrits; // On détermine le nombre de places restantes
-				if($i_inscrits>=$participantsMax) $inscFull = true; else $inscFull = false; // Si on a atteint le nombre max de participants, on désactive l'URL d'inscription et on ouvre la possibilité pour la liste d'attente
-				
-				// On détermine ici si une nouvelle class sera appliquée sur la ligne, pour faciliter la lecture
-				if($inscMe==true)			$cardCssDisplay = "inscMe";
-				elseif($wlMe == true) 		$cardCssDisplay = "wlme";
-				elseif($inscFull == true) 	$cardCssDisplay = "inscFull";
-				else						$cardCssDisplay = "";
 				
 				// On détermine le style de la ligne pour une alternance de couleurs plus sympa
-				if($kId % 2 == 0) 			$cardCssDisplay .= ' type1';
-				else			 			$cardCssDisplay .= ' type2';
+				if($kId % 2 == 0) 			$cardCssDisplay = ' type1';
+				else			 			$cardCssDisplay = ' type2';
 					
 					$kId ++;
 					$card = array(
 						"class" => $cardCssDisplay.' '.$dayFr.''.$iHuman,
 						"date"=> $dateHuman,
-						"inscrits" => $listInscrits.' '.$wlInscrits,
-						"placesRestantes" => $nbrPlacesRestantes,
+						"listInscrits" => $listInscrits,
+						"listAttenteInscrits" => $wlInscrits,
+						"participantsMax" => $participantsMax,
 						"dateXmlQuery" => $dateXmlQuery,
 						"urlPrefix" => $urlIdentity.$listFiltersInURL,
-						"inscFull" => $inscFull,
 						"inscMe" => $inscMe,
 						"wlMe" => $wlMe);
 						
