@@ -207,7 +207,28 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 				-->			
 			</div>			
 			
-			<div class="inscription-passe">{$dateDisplay}</div>
+			<div class="inscription-passe">
+			{foreach $dateDisplay as $card}
+			
+			<div class="card {$card.class}">
+							<div class="cell date">{$card.date}</div>
+							<div class="cell inscrits">{$card.inscrits}</div>
+							<div class="cell places">{$card.placesRestantes}<br/> <span class="text-places-restantes">places restantes</span></div>
+							<div class="cell check">{if $GP_name}
+								<a href="{$card.urlPrefix}&date={$card.dateXmlQuery}&act=
+								{if	$card.inscFull and not $card.inscMe and not $card.wlMe}waitingListAdd#anchor-form" class="insc-listeattente">S'inscrire sur <br/>Liste d'attente<br/> ({$card.wl_nbr_inscrits} en attente)</a>
+								{elseif	$card.inscFull and not $card.inscMe and $card.wlMe}waitingListRemove#anchor-form" class="insc-listeattente-me">Se retirer de <br/>Liste d'attente<br/> ({$card.wl_nbr_inscrits} en attente)</a>								
+								{elseif	$card.inscMe}remove#anchor-form" class="insc-desinsc">Se désinscrire</a>
+								{else}add#anchor-form" class="insc-insc">S'inscrire</a>
+								{/if}
+							{else}&nbsp;
+							{/if}
+							</div>
+						</div>
+			{foreachelse}
+			<div>Les filtres sont trop restrictifs : il n'y a rien à afficher.</div>
+			{/foreach}
+			</div>
 			
 		</div>
 {/if}

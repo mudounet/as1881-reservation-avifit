@@ -304,7 +304,7 @@ foreach($arraySeances as $as => $ask) {
 	}
 }
 
-$listFilters = array ();
+$listFilters = array();
 foreach($arraySeances as $as => $ask) {	
 	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
 	
@@ -362,6 +362,7 @@ foreach($arraySeances as $as => $ask) {
 	
 	$dateDisplay =""; // On prépare le display
 	
+	$listCards = array();
 	foreach ($dates as $k) { // Boucle qui passera chaque jour en revue
 	
 		$kp = explode("-", $k); // On explose la date pour pouvoir manipuler le contenu - 0 = type jour, 1 = année, 2 = mois, 3 = jour		
@@ -428,9 +429,6 @@ foreach($arraySeances as $as => $ask) {
 				$nbrPlacesRestantes = $participantsMax - $i_inscrits; // On détermine le nombre de places restantes
 				if($i_inscrits>=$participantsMax) $inscFull = true; else $inscFull = false; // Si on a atteint le nombre max de participants, on désactive l'URL d'inscription et on ouvre la possibilité pour la liste d'attente
 				
-				
-				
-				
 				// On détermine ici si une nouvelle class sera appliquée sur la ligne, pour faciliter la lecture
 				if($inscMe==true)			$cardCssDisplay = "inscMe";
 				elseif($wlMe == true) 		$cardCssDisplay = "wlme";
@@ -440,28 +438,20 @@ foreach($arraySeances as $as => $ask) {
 				// On détermine le style de la ligne pour une alternance de couleurs plus sympa
 				if($kId % 2 == 0) 			$cardCssDisplay .= ' type1';
 				else			 			$cardCssDisplay .= ' type2';
-				
-				
-				// On affiche le tout
-				$dateDisplay .= '
-					<div class="card '.$cardCssDisplay.' '.$dayFr.''.$iHuman.'">
-							<div class="cell date">'.$dateHuman.'</div>
-							<div class="cell inscrits">'.$listInscrits.' '.$wlInscrits.'</div>
-							<div class="cell places">'.$nbrPlacesRestantes.' <br/> <span class="text-places-restantes">places restantes</span></div>
-							<div class="cell check">';
-							if($unlockInsc == true) {
-								if		($inscFull == false && $inscMe == false )						$dateDisplay.= '<a class="insc-insc" 				href="'.$urlIdentity.'&act=add&date='.$dateXmlQuery.''.$listFiltersInURL.'#anchor-form">S\'inscrire</a>';
-								elseif	($inscFull == true && $inscMe == false && $wlMe	 == false)		$dateDisplay.= '<a class="insc-listeattente"		href="'.$urlIdentity.'&act=waitingListAdd&date='.$dateXmlQuery.''.$listFiltersInURL.'#anchor-form">S\'inscrire sur <br/>Liste d\'attente<br/> ('.$wl_nbr_inscrits.' en attente)</a>';	
-								elseif	($inscFull == true && $inscMe == false && $wlMe	 == true)		$dateDisplay.= '<a class="insc-listeattente-me"	href="'.$urlIdentity.'&act=waitingListRemove&date='.$dateXmlQuery.''.$listFiltersInURL.'#anchor-form">Se retirer de <br/>Liste d\'attente<br/> ('.$wl_nbr_inscrits.' en attente)</a>';							
-								elseif	($inscMe == true)											$dateDisplay.= '<a class="insc-desinsc" 			href="'.$urlIdentity.'&act=remove&date='.$dateXmlQuery.''.$listFiltersInURL.'#anchor-form">Se désinscrire</a>';
-							}
-							
-				$dateDisplay.='				
-							</div>
-						</div>
-					';
 					
 					$kId ++;
+					$card = array(
+						"class" => $cardCssDisplay.' '.$dayFr.''.$iHuman,
+						"date"=> $dateHuman,
+						"inscrits" => $listInscrits.' '.$wlInscrits,
+						"placesRestantes" => $nbrPlacesRestantes,
+						"dateXmlQuery" => $dateXmlQuery,
+						"urlPrefix" => $urlIdentity.$listFiltersInURL,
+						"inscFull" => $inscFull,
+						"inscMe" => $inscMe,
+						"wlMe" => $wlMe);
+						
+					array_push($listCards, $card);
 				}
 			}
 		}
@@ -479,7 +469,7 @@ $smarty->assign('isAdmin',$isAdmin);
 
 $smarty->assign('dateDebloquante',$dateDebloquante);
 $smarty->assign('unlockStyle',$unlockStyle);
-$smarty->assign('dateDisplay',$dateDisplay);
+$smarty->assign('dateDisplay',$listCards);
 
 $smarty->assign('kCount',$kCount);
 $smarty->assign('dateLimitMonthHuman',$dateLimitMonthHuman);
