@@ -94,9 +94,7 @@
 			hr.fancy-line:before, hr.fancy-line:after {content: '';position: relative; width: 100%;}
 			hr.fancy-line, hr.fancy-line:before {background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%,rgba(0,0,0,0) 75%);}
 			#bottom-line {margin-top:30px;}
-			
-			<?php echo $listFiltersInCSS;?>
-			
+		{/literal}{$listFiltersInCSS}{literal}
 			@media screen and (max-width: 1080px) {
 			  .content {width:100%;padding:5px;}
 			  .content .form input {display:block;width:85%;margin:10px auto;}
@@ -107,7 +105,7 @@
 		{/literal}
 		</style>
 		<script>
-			history.replaceState('', 'AS1881 - Avifit - <?php echo $GP_name;?>', ' <?php echo $myURL;?>#anchor-form ');
+			history.replaceState('', 'AS1881 - Avifit - {$GP_name}', ' {$myURL}#anchor-form ');
 		</script>			
 	</head>
 	
@@ -129,7 +127,7 @@
 						<li>Les séances durent 1 heure maximum</li>
 						<li>Evitez de venir en retard, si vous n'êtes pas là au début, votre place pourra être donnée à un membre arrivant</li>
 						<li>Les animateurs sont donnés à titre d'information et une modification peut-être apportée</li>
-						<li>Les séances du mois suivant sont débloquées le  <?php echo $dateDebloquante ;?></li>					
+						<li>Les séances du mois suivant sont débloquées le  {$dateDebloquante}</li>					
 					</ul>
 				Le nombre de places restantes est indiqué à droite.<br/>
 				
@@ -158,34 +156,23 @@
 			<div class="inscription">	
 				
 				
-				<div class="form <?php echo $unlockStyle;?> " id="anchor-form">
+				<div class="form {$unlockStyle}" id="anchor-form">
 					<form action="/as1881-avifit/#anchor-form" method="post">
-						<?php
-							if($unlockInsc  == false) echo '
-								<input name="name" placeholder="Nom" value="'.$GP_name.'" />
-								<input name="email" type="email" placeholder="E-mail" value="'.$GP_email.'"/>
-								<input type="submit" value="S\'authentifier"/>
-								';
-							else {
-								echo '
-								Bienvenue <b>'.$GP_name.'</b> ('.$GP_email.') ! <br/> <br/>
-								Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="'.$myURL.'">'.$myURL.'</a><br/><br/>
-								<a href="https://dev.codeix.fr/as1881-avifit/">Se déconnecter</a>								
-								';
-								
-								
-								if($isAdmin == true) echo '<br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !';
-								}
-						?>	
-					</form>					
+{if $GP_name}
+Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
+								Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="{$myURL}">{$myURL}</a><br/><br/>
+								<a href="{$baseURL}">Se déconnecter</a>
+{if $isAdmin}
+<br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !
+{/if}
+{else}
+								<input name="name" placeholder="Nom" value="{$GP_name}" />
+								<input name="email" type="email" placeholder="E-mail" value="{$GP_email}"/>
+								<input type="submit" value="S'authentifier"/>
+
+{/if}					</form>					
 				
-				
-				<?php echo '
-				<div class="control-panel">Filtres : '.$kCount.' séances sont ouvertes aux inscriptions jusque <b> fin '.$dateLimitMonthHuman.'</b>. <br/><br/>
-					'.$listFilters.' 						
-				</div>';
-				?>
-				
+<div class="control-panel">Filtres : {$kCount} séances sont ouvertes aux inscriptions jusque <b> fin {$dateLimitMonthHuman}</b>. <br/><br/>{$listFilters}</div>
 				</div>
 				<!----
 				<div class="card">
@@ -197,11 +184,7 @@
 				-->			
 			</div>			
 			
-			<div class="inscription-passe">
-				<?php				
-					echo $dateDisplay;
-					?>
-			</div>
+			<div class="inscription-passe">{$dateDisplay}</div>
 			
 		</div>
 		

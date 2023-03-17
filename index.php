@@ -9,6 +9,28 @@ require('setup.php');
 $smarty = new Smarty_Aviron();
 
 
+// base directory
+$base_dir = __DIR__;
+
+// server protocol
+$protocol = empty($_SERVER['HTTPS']) ? 'http' : 'https';
+
+// domain name
+$domain = $_SERVER['SERVER_NAME'];
+
+$doc_root = $_SERVER['DOCUMENT_ROOT'];
+
+// base url
+$base_url = preg_replace("!^${doc_root}!", '', $base_dir);
+$base_url = "";
+
+// server port
+$port = $_SERVER['SERVER_PORT'];
+$disp_port = ($protocol == 'http' && $port == 80 || $protocol == 'https' && $port == 443) ? '' : ":$port";
+
+// put em all together to get the complete base URL
+$baseURL = "${protocol}://${domain}${disp_port}${base_url}";
+
 //---------------------- Paramètres   /!\ Important
 $participantsMax	= 12; 	// Nombre maximal de participants (par défaut : 12)
 $dateDebloquante	= 15; 	// Jour du mois débloquant les inscriptions du mois suivant (par défaut : le 15 du mois)
@@ -446,7 +468,25 @@ if($listFiltersI	> 0) $listFilters = '<a href="'.$myURL.'" >Toutes les séances<
 	$kCount = $kId - 1 ;// On calcule le nombre de séances
 	
 	
-$smarty->assign('name','Ned');
+$smarty->assign('listFiltersInCSS',$listFiltersInCSS);
+$smarty->assign('GP_name',$GP_name);
+$smarty->assign('GP_email',$GP_email);
+
+$smarty->assign('baseURL',$baseURL);
+$smarty->assign('myURL',$myURL);
+$smarty->assign('isAdmin',$isAdmin);
+
+$smarty->assign('dateDebloquante',$dateDebloquante);
+$smarty->assign('unlockStyle',$unlockStyle);
+$smarty->assign('dateDisplay',$dateDisplay);
+
+$smarty->assign('kCount',$kCount);
+$smarty->assign('dateLimitMonthHuman',$dateLimitMonthHuman);
+$smarty->assign('listFilters',$listFilters);
+
+
+
+
 
 $smarty->display('index.tpl');
 	
