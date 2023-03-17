@@ -111,7 +111,7 @@
 	
 	
 	<header> 			
-		<img class="header-logo" src="logo-as1881-2.svg" alt="logo-avifit"/>
+		<img class="header-logo" src="logo.png" alt="logo-avifit"/>
 	</header>
 	
 	
