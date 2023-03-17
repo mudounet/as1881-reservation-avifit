@@ -70,8 +70,8 @@ function getBetweenDates($startDate, $endDate)
 
 	
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
-if(!$xml=simplexml_load_file('data.xml')) 	echo "Echec de chargement de la base de données des inscriptions";
-if(!$wl=simplexml_load_file('wl.xml')) 		echo "Echec de chargement de la base de données de la liste d'attente";
+if(!$xml=simplexml_load_file('data.xml')) $smarty->assign("error_subscribe_db_message", "Echec de chargement de la base de données des inscriptions");
+if(!$wl=simplexml_load_file('wl.xml')) $smarty->assign("error_wait_list_db_message", "Echec de chargement de la base de données de la liste d'attente");
 
 
 //---------------------- Grooming - On fait le ménage dans la BDD	
@@ -131,8 +131,8 @@ if(!$wl=simplexml_load_file('wl.xml')) 		echo "Echec de chargement de la base de
 			$xmlWriteQuery		= $xml->xpath("//insc[@email= '$GP_email' and @name='$GP_name' and @date='$GP_date']");
 			$xmlWriteCount		= $xml->xpath("//insc[@date= '$GP_date']"); // On compte le nombre d'inscription avant d'aller plus loin
 			
-			if 		(count($xmlWriteQuery) > 0 ) echo '<script>alert("Vous êtes déjà inscrit sur cette session")</script>';	 // Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script				
-			elseif 	(count($xmlWriteCount) >= $participantsMax) echo '<script>alert("Désolé ! La place a été prise le temps que vous cliquiez sur le bouton !")</script>'; // Si on a atteint le nombre max de participant pendant le raffraichissement, on arrête le script		
+			if 		(count($xmlWriteQuery) > 0 ) $smarty->assign("error_user_message", "Vous êtes déjà inscrit sur cette session");	 // Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script				
+			elseif 	(count($xmlWriteCount) >= $participantsMax) $smarty->assign("error_user_message", "Désolé ! La place a été prise le temps que vous cliquiez sur le bouton !"); // Si on a atteint le nombre max de participant pendant le raffraichissement, on arrête le script		
 			
 			// On écrit le fichier XML pour les inscriptions
 			else {
@@ -261,8 +261,7 @@ if(!$wl=simplexml_load_file('wl.xml')) 		echo "Echec de chargement de la base de
 			$wlWriteQuery		= $wl->xpath("//wl[@date= '$GP_date' and @name='$GP_name' and @email='$GP_email']");
 			
 			if (count($wlWriteQuery) > 0 ) { // Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
-				echo '<script>alert("Vous êtes déjà inscrit sur cette liste d\'attente")</script>';
-				
+				$smarty->assign("error_subscribe_db_message", "Vous êtes déjà inscrit sur cette liste d'attente");
 			}		
 			
 			// On écrit le fichier XML pour les inscriptions
@@ -305,6 +304,7 @@ foreach($arraySeances as $as => $ask) {
 	}
 }
 
+$listFilters = array ();
 foreach($arraySeances as $as => $ask) {	
 	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
 	
@@ -332,12 +332,12 @@ foreach($arraySeances as $as => $ask) {
 					
 				// DEBUG   echo 'Pour : '. $filter.' => '.$filterkey.' ; URL dans le HREF = '.$listFiltersInHref.'<br>';
 			}		
-			 
-			$listFilters .= '<a href="'.$myURL.''.$listFiltersInHref.'" class="'.$listFiltersInClass.'">'.$as .' à '.$aski.'</a>    ';				
+			
+			$filter = array("url" => $myURL.$listFiltersInHref, "class"=> $listFiltersInClass, "text"=> $as .' à '.$aski);
+			array_push($listFilters, $filter);
 		}
 	}
 }	
-if($listFiltersI	> 0) $listFilters = '<a href="'.$myURL.'" >Toutes les séances</a>    '. $listFilters ;
 
 //---------------------- Affichage
 	// Gestion des dates affichées	
@@ -467,7 +467,8 @@ if($listFiltersI	> 0) $listFilters = '<a href="'.$myURL.'" >Toutes les séances<
 		}
 	$kCount = $kId - 1 ;// On calcule le nombre de séances
 	
-	
+
+
 $smarty->assign('listFiltersInCSS',$listFiltersInCSS);
 $smarty->assign('GP_name',$GP_name);
 $smarty->assign('GP_email',$GP_email);
@@ -484,6 +485,7 @@ $smarty->assign('kCount',$kCount);
 $smarty->assign('dateLimitMonthHuman',$dateLimitMonthHuman);
 $smarty->assign('listFilters',$listFilters);
 
+$smarty->assign('listFiltersI',$listFiltersI);
 
 
 
