@@ -352,18 +352,7 @@ if (
     $_GET["date"] != "" &&
     $isAdmin == true
 ) {
-    foreach (
-        $xml->xpath(
-            '//insc[ @email="' .
-                $GP_email .
-                '" and @name="' .
-                $_GET["targetName"] .
-                '" and @date="' .
-                $_GET["date"] .
-                '"]'
-        )
-        as $el
-    ) {
+	foreach($xml->xpath('//insc[ @email="'. $GP_email .'" and @name="'.$_GET["targetName"].'" and @date="'.$_GET["date"].'"]') as $el) {
         $domRef = dom_import_simplexml($el);
         $domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
         $dom = new DOMDocument("1.0");
