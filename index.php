@@ -633,13 +633,6 @@ foreach ($dates as $k) {
                 }
             }
 
-            // On détermine le style de la ligne pour une alternance de couleurs plus sympa
-            if ($kId % 2 == 0) {
-                $cardCssDisplay = " type1";
-            } else {
-                $cardCssDisplay = " type2";
-            }
-
             $kId++;
             $card = [
                 "class" => $cardCssDisplay . " " . $dayFr . "" . $iHuman,
