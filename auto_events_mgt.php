@@ -55,9 +55,12 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 			if (isset($existingAutoEvents[$timestamp][$id])) continue;  // l'évènement existe déjà dans le fichier XML d'évènements
 			
 			$newEvent['date'] = date('Y-m-d', $timestamp);
+			$newEvent['timestamp'] = \DateTime::createFromFormat('Y-m-d H:i T', $newEvent['date'].' '.str_replace('h', ':', $newEvent['heureDebut']).' Europe/Paris')->getTimestamp();
 			$newEvents[] = $newEvent;
 		}
 	}
+	
+	usort($newEvents, 'cmp'); // Sort array of events
 
 	// Write everything to new file
 	$eventsXml = new SimpleXMLElement('<?xml version="1.0"?><events/>');
@@ -73,19 +76,8 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 	return $result;
 }
 
-// function defination to convert array to xml
-function array_to_xml( $data, &$xml_data ) {
-	foreach( $data as $key => $value ) {
-		if( is_array($value) ) {
-			if( is_numeric($key) ){
-				$key = 'item'.$key; //dealing with <0/>..<n/> issues
-			}
-			$subnode = $xml_data->addChild($key);
-			array_to_xml($value, $subnode);
-		} else {
-			$xml_data->addChild("$key",htmlspecialchars("$value"));
-		}
-	 }
+function cmp($a, $b){
+    return $a['timestamp'] - $b['timestamp'];
 }
 
 $dateActuelle = strtotime(date("Y-m-d")); // Date du jour
