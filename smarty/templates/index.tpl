@@ -1,3 +1,5 @@
+{$listFiltersURL='?'}
+{foreach $listFilters as $filter}{if $filter.actif}{$listFiltersURL=$listFiltersURL|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
 <html>
 	<head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
@@ -10,7 +12,6 @@
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 	</head>
 		<link rel="stylesheet" type="text/css" href="styles.css" />
-		<style>{$listFiltersInCSS}</style>
 		<script>
 			history.replaceState('', 'AS1881 - Avifit - {$GP_name}', ' {$myURL}#anchor-form ');
 		</script>
@@ -20,6 +21,7 @@
 	</header>
 	<body>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+	<
 {if isset($error_subscribe_db_message)}
 <div class="alert alert-danger" role="alert">Erreur fatale : {$error_subscribe_db_message}</div>
 {elseif isset($error_wait_list_db_message)}
@@ -87,9 +89,8 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 								<input name="email" type="email" placeholder="E-mail" value="{$GP_email}"/>
 								<input type="submit" value="S'authentifier"/>
 {/if}					</form>
-<div class="control-panel">Filtres : {$kCount} séances sont ouvertes aux inscriptions jusque <b> fin {$dateLimitMonthHuman}</b>. <br/><br/>
-{foreach $listFilters as $filter}<a href="{$filter.url}" class="{$filter.class}">{$filter.text}</a>{/foreach}
-{if $listFiltersI > 0}<a href="{$myURL}" >Réinitialiser les filtres</a>{/if}</div>
+<div class="control-panel">{$oneFilterActive=0}{foreach $listFilters as $filter}{if $filter.actif}{$oneFilterActive=$oneFilterActive+1}<a href="{$listFiltersURL}&{$filter.categorie}=" class="filter-hidden">{$filter.text}</a>{else}<a href="{$listFiltersURL}&{$filter.categorie}=hide" class="filter-shown">{$filter.text}</a>{/if}{/foreach}
+{if $oneFilterActive > 0}<a href="{$myURL}" >Réinitialiser les {$oneFilterActive} filtre(s)</a>{/if}</div>
 				</div>
 			</div>
 			<div class="inscription-passe">
@@ -98,10 +99,10 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 			{$last_year=""}
 			{foreach $dateDisplay as $card}
 				{$inscFull=$card.participantsMax - count($card.listInscrits)}
-				{if $last_month ne $card.mois}<div class="annee">{$card.mois} {$card.annee}</div>{$last_month=$card.mois}{/if}
-				{if $last_day ne $card.dateJour}<div class="annee"><b>{$card.jour|upper|truncate:3:""} {$card.dateJour}</b></div>{$last_day=$card.dateJour}{/if}
-			<div class="card {$card.class}">
-							<div class="cell date">{if $card.animateur}<span class="animateur">Animé par <b>{$card.animateur}</b><br/></span>{/if}
+				{if $last_month ne $card.moisFR}<div class="annee">{$card.moisFR} {$card.annee}</div>{$last_month=$card.moisFR}{/if}
+				{if $last_day ne $card.dateJour}<div class="annee"><b>{$card.jourFR|upper|truncate:3:""} {$card.dateJour}</b></div>{$last_day=$card.dateJour}{/if}
+			<div class="card {$card.categorie}">
+							<div class="cell date">{if $card.animateur ne ''}<span class="animateur">Animé par <b>{$card.animateur}</b><br/></span>{/if}
 								<span class="heure-debut">{$card.heureDebut}</span> - <span class="heure-fin">{$card.heureFin}<span>
 							</div>
 							<div class="cell inscrits">

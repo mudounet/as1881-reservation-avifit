@@ -19,86 +19,30 @@ $base_url = preg_replace('/^'.preg_quote($_SERVER["DOCUMENT_ROOT"]).'/', "", __D
 // put em all together to get the complete base URL
 $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
 
-//---------------------- Paramètres   /!\ Important
+// Type d'évènements
+$arrayCategories = [
+	"CATEGORIE_SEANCES_AVIFIT" => "Avifit",
+	"CATEGORIE_SEANCES_TANKARAMER" => "Tank à ramer",
+	"CATEGORIE_SEANCES_COMPETITION" => "Séances compétition",
+	"CATEGORIE_SEANCES_LOISIRS" => "Séances loisirs",
+];
+
+//---------------------- Paramètres	 /!\ Important
 $participantsMax = 12; // Nombre maximal de participants (par défaut : 12)
 $dateDebloquante = 15; // Jour du mois débloquant les inscriptions du mois suivant (par défaut : le 15 du mois)
 $dateDebloLimit = 1; // Nombre de mois débloqués en arrivant au jour de la variable précédente (par défaut : 1)
 $datePurge = 10; // Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
-$arraySeances = [
-	"Dimanche" => "",
-	"Lundi" => "1830",
-	"Mardi" => "",
-	"Mercredi" => "1830,1930",
-	"Jeudi" => "",
-	"Vendredi" => "1830",
-	"Samedi" => "",
-]; // On liste les séances qu'on veut, on met les horaires au format HHmm, séparés par une "," , pour pouvoir les manipuler comme des nombres par la suite
-$arrayAnimateur = [
-	"Dimanche" => "",
-	"Lundi" => "",
-	"Mardi" => "",
-	"Mercredi" => "JP",
-	"Jeudi" => "",
-	"Vendredi" => "Fred",
-	"Samedi" => "",
-]; // On liste les animateurs des séances
+
 $arrayAdmin = [];
 include 'admins.php';
 //----------------------  Fonctions	& Pré-requis
-function getBetweenDates($startDate, $endDate)
-{
-	$rangArray = [];
-
-	$startDate = strtotime($startDate);
-	$endDate = strtotime($endDate);
-
-	for ($currentDate = $startDate; $currentDate < $endDate; $currentDate += 86400) {
-		$date = date("w-Y-m-d", $currentDate);
-		$rangArray[] = $date;
-	}
-	return $rangArray;
-}
-
 function getByPostOrGet($property, $defaults) {
-	if (isset($_GET[$property]) && $_GET[$property] != '') return $_GET[$property];
-	if (isset($_POST[$property]) && $_POST[$property] != '') return $_POST[$property];
+	if (isset($property) && array_key_exists((string)$property, $_GET)) return $_GET[$property];
+	if (isset($property) && array_key_exists((string)$property, $_POST)) return $_POST[$property];
 	return $defaults;
 }
 
 date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
-$dayHuman = [
-	"Dimanche",
-	"Lundi",
-	"Mardi",
-	"Mercredi",
-	"Jeudi",
-	"Vendredi",
-	"Samedi",
-]; // On liste les jours de la semaine en français
-$monthHuman = [
-	"Janvier",
-	"Février",
-	"Mars",
-	"Avril",
-	"Mai",
-	"Juin",
-	"Juillet",
-	"Aout",
-	"Septembre",
-	"Octobre",
-	"Novembre",
-	"Décembre",
-]; // On liste les mois de l'année en français
-
-// On prépare les limites
-$dateToday = date("Y-m-d");
-$dateTodayPieces = explode("-", $dateToday); // 0 : Année ;  1 : Mois ;  2 : jour
-$dateTodayPiecesToHuman = $dateTodayPieces[1] - 1; // Pas envie d'en faire un int...
-$dateTodayHuman = $dateTodayPieces[2]
-	. " "
-	. $monthHuman[$dateTodayPiecesToHuman]
-	. " "
-	. $dateTodayPieces[0]; // On a la date du jour au format compréhensible
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
 if (!($xml = simplexml_load_file("data.xml"))) {
@@ -111,6 +55,12 @@ if (!($wl = simplexml_load_file("wl.xml"))) {
 	$smarty->assign(
 		"error_wait_list_db_message",
 		"Echec de chargement de la base de données de la liste d'attente"
+	);
+}
+if (!($eventsXml = simplexml_load_file('events.xml'))) {
+	$smarty->assign(
+		"error_wait_list_db_message",
+		"Echec de chargement de la base de données des évènements"
 	);
 }
 
@@ -160,6 +110,7 @@ if ($GP_name != "" && $GP_email != "") {
 		}
 	}
 } else {
+	$unlockStyle = "";
 	$myURL = $baseURL . "?anonymous";
 }
 
@@ -425,176 +376,78 @@ if ($action == "waitingListAdd"
 }
 
 //---------------------- Gestion des filtres
-$listFiltersInCSS = ""; // On vide le contenu qui sera envoyé dans la CSS au cas où
-$listFiltersInURL = ""; // On vide la liste des filtres pour commencer
-$listFiltersInHref = ""; // On vide la liste des items dans le href qu'on va faire
-$listFiltersArray = []; // On prépare un array pour stocker les statuts des filtres
-$listFiltersI = 0;
-if ($unlockInsc != true) {
-	$urlSafety = "?anonymous";
+$listFilters = []; // On prépare un array pour stocker les statuts des filtres
+$quickFilterList = []; // on utilise l'index pour identifier rapidement les filtres qui sont actifs lors du filtrage des évènements
+
+foreach ($arrayCategories as $key => $texte) {
+	$filtreActif = getByPostOrGet($key, '') == 'hide' ? 1 : 0;
+	if($filtreActif) $quickFilterList[$key] = 1;
+	
+	$filter = [
+		"categorie" => $key,
+		"actif" => $filtreActif,
+		"text" => $texte,
+		];
+	array_push($listFilters, $filter);
 }
 
-// Il faut que je repasse deux fois par cette boucle pour pouvoir avoir l'état de TOUS les filtres. J'ai pas trouvé de moyen d'optimiser la chose.
-foreach ($arraySeances as $as => $ask) {
-	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
-
-	foreach ($listSeanceDuJour as $i) {
-		// On commence par établir l'URL pour maintenir les différents éléments à travers les manipulations
-		if ($i != "") {
-			$aski = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-			$cssFiltersName = $as . "" . $aski; // On génère le nom de la classe CSS pour l'affichage/désaffichage
-			$cssFilterValue = getByPostOrGet("$cssFiltersName", '');
-			if ($cssFilterValue == "hide") {
-				$listFiltersArray[$cssFiltersName] = "hide";
-				$listFiltersI++; // On incrémente le compteur de filtre actif
-			} elseif ($cssFilterValue == "show"
-				or $cssFilterValue == "") {
-				// Le but est de récupérer les items dans l'URL, de changer l'option pour CET element, mais de garder son statut pour générer les liens suivants
-				$listFiltersInURL .= ""; // Dans l'URL actuelle, on ne mets rien si rien n'est précisé
-				$listFiltersArray[$cssFiltersName] = "show";
-			}
-		}
-	}
-}
-
-$listFilters = [];
-foreach ($arraySeances as $as => $ask) {
-	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
-
-	foreach ($listSeanceDuJour as $i) {
-		// On commence par établir l'URL pour maintenir les différents éléments à travers les manipulations
-		if ($i != "") {
-			$aski = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-			$cssFiltersName = $as . "" . $aski; // On génère le nom de la classe CSS pour l'affichage/désaffichage
-			$listFiltersInHref = ""; // On reset l'HREF pour cette variable
-
-			// On commence une boucle avec l'array qui contient les filtres
-			foreach ($listFiltersArray as $filter => $filterkey) {
-				if ($filter != $cssFiltersName && $filterkey == "hide") {
-					// Si l'array ne correspond pas au filtre et que son statut est HIDE, on l'ajoute à l'URL pour cette phase là
-					$listFiltersInHref .= "&" . $filter . "=hide";
-				} elseif ($filter == $cssFiltersName && $filterkey == "hide") {
-					$listFiltersInHref .= "";
-					$listFiltersInClass = "filter-hidden";
-					$listFiltersInURL .= "&" . $cssFiltersName . "=hide";
-					$listFiltersInCSS .= "." . $cssFiltersName . " {display:none;}";
-				} elseif ($filter == $cssFiltersName && $filterkey == "show") {
-					$listFiltersInHref .= "&" . $cssFiltersName . "=hide";
-					$listFiltersInClass = "filter-shown";
-				}
-			}
-
-			$filter = [
-				"url" => $myURL . $listFiltersInHref,
-				"class" => $listFiltersInClass,
-				"text" => $as . " à " . $aski,
-			];
-			array_push($listFilters, $filter);
-		}
-	}
-}
-
-//---------------------- Affichage
-// Gestion des dates affichées
-// On manipule les années
-if ($dateTodayPieces[1] == 12) {
-	$dateLimitYear = $dateTodayPieces[0] + 1;
-}
-// Si on est en décembre, la limite est fixé à l'an prochain
-else {
-	$dateLimitYear = $dateTodayPieces[0];
-}
-
-// On manipule les mois
-if ($dateTodayPieces[2] >= $dateDebloquante) {
-	$dateLimitMonth = $dateTodayPieces[1] + 1 + $dateDebloLimit;
-}
-// Si on est le $dateDebloquante du mois, on décale au mois suivant
-else {
-	$dateLimitMonth = $dateTodayPieces[1] + $dateDebloLimit;
-}
-
-$dateLimitMonthHuman = $monthHuman[$dateLimitMonth - 2];
-
-// On définit le jour de la limite, qui sera toujours le 1er du mois suivant pour plus de facilité, et ca m'évite de prendre en compte les mois à 28, 29, 30 & 31 jours
-$dateLimitDay = 1;
-
-$dateLimit = $dateLimitYear . "-" . $dateLimitMonth . "-" . $dateLimitDay; // On reconstruit la date limite
-$dates = getBetweenDates($dateToday, $dateLimit); // On liste les dates entre aujourd'hui et la date limite
-
-$kId = 1; // On met le compteur de session à 1
-
+$fmt = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'yyyy-MM-dd-HH-mm-eeee-MMMM');
 $listCards = [];
-foreach ($dates as $k) {
-	// Boucle qui passera chaque jour en revue
-
-	$kp = explode("-", $k); // On explose la date pour pouvoir manipuler le contenu - 0 = type jour, 1 = année, 2 = mois, 3 = jour
-	$kp2Trim = $kp[2] - 1; // On enleve 1 pour tomber sur l'array
-	$dayFr = $dayHuman[$kp[0]];
-
-	if ($arraySeances[$dayFr] != "") {
-		// Si le jour correspond à l'array du début, alors on affiche une ligne
-
-		$listSeanceDuJour = explode(",", $arraySeances[$dayFr]); // On éclate la liste des horaires du jours
-
-		foreach ($listSeanceDuJour as $i) {
-			// On formate la date en un truc pas trop moche
-			$iHuman = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-
-			// On récupère les inscrits et les gens de la waiting list
-			$dateXmlQuery = $kp[1] . "-" . $kp[2] . "-" . $kp[3] . "-" . $i; // Je reconstruit la date
-
-			// Gestion des inscrits
-			$listInscrits = []; // On reset la liste des inscrit
-			$inscMe = false; // On remet à false le fait d'être inscrit
-			foreach ($xml->xpath("//insc[@date= '$dateXmlQuery' ]") as $q) { // On query uniquement le xml pour la date demandée
-				if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-					array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
-					$inscMe = true;
-				} else {
-					array_push($listInscrits, $q["name"]);
-				}
-			}
-
-			// Gestion de la waiting list
-			$wlInscrits = []; // On reset la waiting list au cas où
-			$wlMe = false;
-			foreach ($wl->xpath("//wl[@date= '$dateXmlQuery']") as $q) { // On query uniquement le xml pour la date demandée
-				if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-					// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
-					array_unshift($wlInscrits, $q["name"]); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
-					$wlMe = true;
-				} else {
-					array_push($wlInscrits, $q["name"]);
-				}
-			}
-
-			$kId++;
-			$card = [
-				"class" => " " . $dayFr . "" . $iHuman,
-				"jour" => $dayFr,
-				"dateJour" => $kp[3],
-				"mois" => $monthHuman[$kp2Trim],
-				"annee" => $kp[1],
-				"heureDebut" => $iHuman,
-				"heureFin" => $iHuman,
-				"animateur" => $arrayAnimateur[$dayFr],
-				"listInscrits" => $listInscrits,
-				"listAttenteInscrits" => $wlInscrits,
-				"participantsMax" => $participantsMax,
-				"dateXmlQuery" => $dateXmlQuery,
-				"urlPrefix" => $urlIdentity . $listFiltersInURL,
-				"inscMe" => $inscMe,
-				"wlMe" => $wlMe,
-			];
-
-			array_push($listCards, $card);
+foreach ($eventsXml->event as $event) {
+	// Boucle qui passera chaque évènement en revue
+	
+	if (isset($event['categorie']) && array_key_exists((string)$event['categorie'], $quickFilterList)) continue; // L'evènement est filtré, donc on passe à la suite
+	
+	list($year, $month, $day, $hour, $minutes, $weekday, $monthName) = explode("-", $fmt->format((int)$event['timestamp']));
+	
+	$cardId = $event['timestamp'].'-'.$event['autoId'];
+	
+	// Gestion des inscrits
+	$listInscrits = []; // On reset la liste des inscrit
+	$inscMe = false; // On remet à false le fait d'être inscrit
+	foreach ($xml->xpath("//insc[@date= '$cardId' ]") as $q) { // On query uniquement le xml pour la date demandée
+		if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+			array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+			$inscMe = true;
+		} else {
+			array_push($listInscrits, $q["name"]);
 		}
 	}
-}
-$kCount = $kId - 1; // On calcule le nombre de séances
 
-$smarty->assign("listFiltersInCSS", $listFiltersInCSS);
+	// Gestion de la waiting list
+	$wlInscrits = []; // On reset la waiting list au cas où
+	$wlMe = false;
+	foreach ($wl->xpath("//wl[@date= '$cardId']") as $q) { // On query uniquement le xml pour la date demandée
+		if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+			// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
+			array_unshift($wlInscrits, $q["name"]); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
+			$wlMe = true;
+		} else {
+			array_push($wlInscrits, $q["name"]);
+		}
+	}
+
+	$card = [
+		"categorie" => $event['categorie'],
+		"cardId" => $cardId,
+		"jourFR" => $weekday,
+		"dateJour" => $day,
+		"moisFR" => $monthName,
+		"annee" => $year,
+		"mois" => $month,
+		"heureDebut" => $event['heureDebut'],
+		"heureFin" => $event['heureFin'],
+		"animateur" => $event['referent'],
+		"listInscrits" => $listInscrits,
+		"listAttenteInscrits" => $wlInscrits,
+		"participantsMax" => $participantsMax,
+		"inscMe" => $inscMe,
+		"wlMe" => $wlMe,
+	];
+
+	array_push($listCards, $card);
+}
+
 $smarty->assign("GP_name", $GP_name);
 $smarty->assign("GP_email", $GP_email);
 
@@ -606,11 +459,7 @@ $smarty->assign("dateDebloquante", $dateDebloquante);
 $smarty->assign("unlockStyle", $unlockStyle);
 $smarty->assign("dateDisplay", $listCards);
 
-$smarty->assign("kCount", $kCount);
-$smarty->assign("dateLimitMonthHuman", $dateLimitMonthHuman);
 $smarty->assign("listFilters", $listFilters);
-
-$smarty->assign("listFiltersI", $listFiltersI);
 
 $smarty->display("index.tpl");
 
