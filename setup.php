@@ -33,9 +33,9 @@ class Smarty_Aviron extends Smarty {
         //$this->setConfigDir('/web/www.example.com/guestbook/configs/');
         //$this->setCacheDir('/web/www.example.com/guestbook/cache/');
 
-        $this->caching = Smarty::CACHING_LIFETIME_CURRENT;
-		$this->debugging = true;
-        $this->assign('app_name', 'AS1881');
+        //$this->caching = Smarty::CACHING_LIFETIME_CURRENT;
+		$this->caching = 0;
+		$this->debugging = false;
 		
 		#define( 'CFG_DIR_TEMPLATES', $this->getTemplateDir(0) );
    }
