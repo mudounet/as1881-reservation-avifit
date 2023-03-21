@@ -1,5 +1,5 @@
-{$listFiltersURL='?'}
-{foreach $listFilters as $filter}{if $filter.actif}{$listFiltersURL=$listFiltersURL|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
+{$urlWithFilters=$loginURL}
+{foreach $listFilters as $filter}{if $filter.actif}{$urlWithFilters=$urlWithFilters|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
 <html>
 	<head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
@@ -13,7 +13,7 @@
 	</head>
 		<link rel="stylesheet" type="text/css" href="styles.css" />
 		<script>
-			history.replaceState('', 'AS1881 - Avifit - {$GP_name}', ' {$myURL}#anchor-form ');
+			history.replaceState('', 'AS1881 - Avifit - {$GP_name}', ' {$loginURL} ');
 		</script>
 	</head>
 	<header>
@@ -21,7 +21,6 @@
 	</header>
 	<body>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-	<
 {if isset($error_subscribe_db_message)}
 <div class="alert alert-danger" role="alert">Erreur fatale : {$error_subscribe_db_message}</div>
 {elseif isset($error_wait_list_db_message)}
@@ -51,7 +50,7 @@
 						<li>Les séances durent 1 heure maximum</li>
 						<li>Evitez de venir en retard, si vous n'êtes pas là au début, votre place pourra être donnée à un membre arrivant</li>
 						<li>Les animateurs sont donnés à titre d'information et une modification peut-être apportée</li>
-						<li>Les séances du mois suivant sont débloquées le  {$dateDebloquante}</li>
+						<li>Les séances du mois suivant sont débloquées 15 jours à l'avance.</li>
 					</ul>
 				Le nombre de places restantes est indiqué à droite.<br/>
 				<div class="table">
@@ -76,10 +75,10 @@
 			<hr class="fancy-line"/>
 			<div class="inscription">
 				<div class="form {$unlockStyle}" id="anchor-form">
-					<form action="/as1881-avifit/#anchor-form" method="post">
+					<form action="{$urlWithFilters}" method="post">
 {if $GP_name}
 Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
-								Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="{$myURL}">{$myURL}</a><br/><br/>
+								Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="{$loginURL}">{$loginURL}</a><br/><br/>
 								<a href="{$baseURL}">Se déconnecter</a>
 {if $isAdmin}
 <br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !
@@ -89,8 +88,8 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 								<input name="email" type="email" placeholder="E-mail" value="{$GP_email}"/>
 								<input type="submit" value="S'authentifier"/>
 {/if}					</form>
-<div class="control-panel">{$oneFilterActive=0}{foreach $listFilters as $filter}{if $filter.actif}{$oneFilterActive=$oneFilterActive+1}<a href="{$listFiltersURL}&{$filter.categorie}=" class="filter-hidden">{$filter.text}</a>{else}<a href="{$listFiltersURL}&{$filter.categorie}=hide" class="filter-shown">{$filter.text}</a>{/if}{/foreach}
-{if $oneFilterActive > 0}<a href="{$myURL}" >Réinitialiser les {$oneFilterActive} filtre(s)</a>{/if}</div>
+<div class="control-panel">{$oneFilterActive=0}{foreach $listFilters as $filter}{if $filter.actif}{$oneFilterActive=$oneFilterActive+1}<a href="{$urlWithFilters}&{$filter.categorie}=" class="filter-hidden">{$filter.text}</a>{else}<a href="{$urlWithFilters}&{$filter.categorie}=hide" class="filter-shown">{$filter.text}</a>{/if}{/foreach}
+{if $oneFilterActive > 0}<a href="{$loginURL}" >Réinitialiser les {$oneFilterActive} filtre(s)</a>{/if}</div>
 				</div>
 			</div>
 			<div class="inscription-passe">
@@ -106,16 +105,16 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 								<span class="heure-debut">{$card.heureDebut}</span> - <span class="heure-fin">{$card.heureFin}<span>
 							</div>
 							<div class="cell inscrits">
-							{foreach $card.listInscrits as $inscrit}{if $card.inscMe && $inscrit@first}<b>{$inscrit}</b>{else}{$inscrit}{/if}{if not $inscrit@last},  {/if}{foreachelse}Créneau ouvert{/foreach}
-							{if $card.listAttenteInscrits}<br/><span>Liste attente ({count($card.listAttenteInscrits)}) : {foreach $card.listAttenteInscrits as $wlInscrit}{if $card.inscMe}<b>{$wlInscrit} | </b>{else}{$wlInscrit}{/if}{/foreach}</span>{/if}
+							{foreach $card.listInscrits as $inscrit}{if $isAdmin}<a href="{$urlWithFilters}&act=adminRemove&targetName={$inscrit.name}&targetEmail={$inscrit.email}&id={$card.cardId}">{/if}{if $card.inscMe && $inscrit@first}<b>{$inscrit.name}</b>{else}{$inscrit.name}{/if}{if not $inscrit@last},  {/if}{if $isAdmin}</a>{/if}{foreachelse}Créneau ouvert{/foreach}
+							{if $card.listAttenteInscrits}<br/><span>Liste attente ({count($card.listAttenteInscrits)}) : {foreach $card.listAttenteInscrits as $wlInscrit}{if $isAdmin}<a href="{$urlWithFilters}&act=adminRemove&targetName={$wlInscrit.name}&targetEmail={$wlInscrit.email}&id={$card.cardId}">{/if}{if $card.inscMe}<b>{$wlInscrit.name} | </b>{else}{$wlInscrit.name}{/if}{if $isAdmin}</a>{/if}{/foreach}</span>{/if}
 							</div>
 							<div class="cell places">{$inscFull}/{$card.participantsMax}<br/> <span class="text-places-restantes">places restantes</span></div>
 							<div class="cell check">{if $GP_name}
-								<a href="{$card.urlPrefix}&date={$card.dateXmlQuery}&act=
-								{if	$card.wlMe}waitingListRemove#anchor-form" class="insc-listeattente-me">Se retirer de <br/>Liste d'attente</a>
-								{elseif	$card.inscMe}remove#anchor-form" class="insc-desinsc">Se désinscrire</a>
-								{elseif	$inscFull <= 0}waitingListAdd#anchor-form" class="insc-listeattente">S'inscrire sur <br/>Liste d'attente</a>
-								{else}add#anchor-form" class="insc-insc">S'inscrire</a>
+								<a href="{$urlWithFilters}&id={$card.cardId}&act=
+								{if	$card.wlMe}waitingListRemove" class="insc-listeattente-me">Se retirer de <br/>Liste d'attente</a>
+								{elseif	$card.inscMe}remove" class="insc-desinsc">Se désinscrire</a>
+								{elseif	$inscFull <= 0}waitingListAdd" class="insc-listeattente">S'inscrire sur <br/>Liste d'attente</a>
+								{else}add" class="insc-insc">S'inscrire</a>
 								{/if}
 							{else}&nbsp;
 							{/if}
