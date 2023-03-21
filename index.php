@@ -14,7 +14,8 @@ $port = $_SERVER["SERVER_PORT"];
 $disp_port = ($protocol == "http" && $port == 80)
 	|| ($protocol == "https" && $port == 443) ? "" : ":$port";
 	
-$base_url = preg_replace('/^'.preg_quote($_SERVER["DOCUMENT_ROOT"]).'/', "", __DIR__);
+$base_url = preg_replace('/^'.preg_quote($_SERVER["DOCUMENT_ROOT"]).'/', "", __FILE__);
+$base_url = str_replace('\\', '/', $base_url);
 
 // put em all together to get the complete base URL
 $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
