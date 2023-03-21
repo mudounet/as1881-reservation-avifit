@@ -53,8 +53,8 @@
 						.waitingListIntro {font-size:7pt;color:grey;}
 						
 						
-					.card.Lundi		{}
-					.card.Mercredi	{}
+					.card.CATEGORIE_SEANCES_AVIFIT { background: #ffffff url("./img/ergometre.jpg") no-repeat right center; }
+					.card.CATEGORIE_SEANCES_TANKARAMER { background: #F0F0F0FA url("./img/tank_a_ramer.jpg") no-repeat right center; }
 					.card.Vendredi	{}
 					.card.type1		{background:transparent;}
 					.card.type2		{background:#F0F0F0FA;}
