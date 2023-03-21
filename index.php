@@ -71,6 +71,12 @@ function getBetweenDates($startDate, $endDate)
 	return $rangArray;
 }
 
+function getByPostOrGet($property, $defaults) {
+	if (isset($_GET[$property]) && $_GET[$property] != '') return $_GET[$property];
+	if (isset($_POST[$property]) && $_POST[$property] != '') return $_POST[$property];
+	return $defaults;
+}
+
 date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
 $dayHuman = [
 	"Dimanche",
@@ -147,25 +153,10 @@ foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el
 }
 //---------------------- Inscription, Désinscription et Waiting List
 // On vérifie si on a des données en POST ou en GET
-$GP_name = "";
-$GP_email = "";
-$GP_date = "";
+$GP_name = getByPostOrGet('name', '');
+$GP_email = getByPostOrGet('email', '');
+$GP_date = getByPostOrGet('date', '');
 $isAdmin = false;
-
-if ($_GET["name"] != "") {
-	$GP_name = $_GET["name"];
-} elseif ($_POST["name"] != "") {
-	$GP_name = $_POST["name"];
-}
-
-if ($_GET["email"] != "") {
-	$GP_email = $_GET["email"];
-} elseif ($_POST["email"] != "") {
-	$GP_email = $_POST["email"];
-}
-$GP_date = $_GET["date"];
-
-//echo 'Debug :'.$GP_date.' - '.$GP_email.' - '.$GP_name;
 
 if ($GP_name != "" && $GP_email != "") {
 	// Si on a un post ou un get d'email et de name, l'inscription est ouverte
@@ -184,9 +175,10 @@ if ($GP_name != "" && $GP_email != "") {
 	$myURL = $baseURL . "?anonymous";
 }
 
+$action = getByPostOrGet('act', "");
 // Gestion de l'inscription à la séance
 // Si on est sur un act ADD, alors on termine l'inscription
-if ($_GET["act"] == "add"
+if ($action == "add"
 	&& $GP_name != ""
 	&& $GP_email != ""
 	&& $GP_date != "") {
@@ -246,7 +238,7 @@ if ($_GET["act"] == "add"
 }
 
 // Si on est sur un act REMOVE, alors on supprime le truc
-if ($_GET["act"] == "remove" && $GP_name != "" && $GP_email != "") {
+if ($action == "remove" && $GP_name != "" && $GP_email != "") {
 	foreach ($xml->xpath(
 		'//insc[ @email="'
 			. $GP_email
@@ -319,7 +311,7 @@ if ($_GET["act"] == "remove" && $GP_name != "" && $GP_email != "") {
 }
 
 // Si on est sur un act REMOVE, alors on supprime le truc
-if ($_GET["act"] == "adminRemove"
+if ($action == "adminRemove"
 	&& $_GET["targetName"] != ""
 	&& $_GET["targetEmail"] != ""
 	&& $_GET["date"] != ""
@@ -396,7 +388,7 @@ if ($_GET["act"] == "adminRemove"
 
 // Gestion de la waiting list
 // Si on est sur un act waitinListRemove, alors on supprime le truc
-if ($_GET["act"] == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
+if ($action == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
 	foreach ($wl->xpath(
 		'//wl[ @email="'
 			. $GP_email
@@ -417,7 +409,7 @@ if ($_GET["act"] == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
 }
 
 // Si on est sur un act waitingListADD, alors on y go
-if ($_GET["act"] == "waitingListAdd"
+if ($action == "waitingListAdd"
 	&& $GP_name != ""
 	&& $GP_email != ""
 	&& $GP_date != "") {
@@ -463,12 +455,12 @@ foreach ($arraySeances as $as => $ask) {
 		if ($i != "") {
 			$aski = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
 			$cssFiltersName = $as . "" . $aski; // On génère le nom de la classe CSS pour l'affichage/désaffichage
-
-			if ($_GET[$cssFiltersName] == "hide") {
+			$cssFilterValue = getByPostOrGet("$cssFiltersName", '');
+			if ($cssFilterValue == "hide") {
 				$listFiltersArray[$cssFiltersName] = "hide";
 				$listFiltersI++; // On incrémente le compteur de filtre actif
-			} elseif ($_GET[$cssFiltersName] == "show"
-				or $_GET[$cssFiltersName] == "") {
+			} elseif ($cssFilterValue == "show"
+				or $cssFilterValue == "") {
 				// Le but est de récupérer les items dans l'URL, de changer l'option pour CET element, mais de garder son statut pour générer les liens suivants
 				$listFiltersInURL .= ""; // Dans l'URL actuelle, on ne mets rien si rien n'est précisé
 				$listFiltersArray[$cssFiltersName] = "show";
@@ -591,7 +583,7 @@ foreach ($dates as $k) {
 
 			$kId++;
 			$card = [
-				"class" => $cardCssDisplay . " " . $dayFr . "" . $iHuman,
+				"class" => " " . $dayFr . "" . $iHuman,
 				"jour" => $dayFr,
 				"dateJour" => $kp[3],
 				"mois" => $monthHuman[$kp2Trim],
