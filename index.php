@@ -89,24 +89,9 @@ BODY;
 date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
-if (!($xml = simplexml_load_file("data.xml"))) {
-	$smarty->assign(
-		"error_subscribe_db_message",
-		"Echec de chargement de la base de données des inscriptions"
-	);
-}
-if (!($wl = simplexml_load_file("wl.xml"))) {
-	$smarty->assign(
-		"error_wait_list_db_message",
-		"Echec de chargement de la base de données de la liste d'attente"
-	);
-}
-if (!($eventsXml = simplexml_load_file('events.xml'))) {
-	$smarty->assign(
-		"error_wait_list_db_message",
-		"Echec de chargement de la base de données des évènements"
-	);
-}
+if (!($xml = simplexml_load_file("data.xml"))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+if (!($wl = simplexml_load_file("wl.xml"))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
 
 //---------------------- Grooming - On fait le ménage dans la BDD
 // On détermine la date avant laquelle toutes les entrées sont supprimées
