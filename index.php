@@ -8,34 +8,22 @@ require "setup.php";
 
 $smarty = new Smarty_Aviron();
 
-// base directory
-$base_dir = __DIR__;
-
-// server protocol
 $protocol = empty($_SERVER["HTTPS"]) ? "http" : "https";
-
-// domain name
 $domain = $_SERVER["SERVER_NAME"];
-
-$doc_root = $_SERVER["DOCUMENT_ROOT"];
-
-// base url
-$base_url = preg_replace("!^${doc_root}!", "", $base_dir);
-$base_url = "";
-
-// server port
 $port = $_SERVER["SERVER_PORT"];
 $disp_port = ($protocol == "http" && $port == 80)
 	|| ($protocol == "https" && $port == 443) ? "" : ":$port";
+	
+$base_url = preg_replace('/^'.preg_quote($_SERVER["DOCUMENT_ROOT"]).'/', "", __DIR__);
 
 // put em all together to get the complete base URL
 $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
 
-//---------------------- Paramètres   /!\ Important
-$participantsMax = 12; // Nombre maximal de participants (par défaut : 12)
-$dateDebloquante = 15; // Jour du mois débloquant les inscriptions du mois suivant (par défaut : le 15 du mois)
-$dateDebloLimit = 1; // Nombre de mois débloqués en arrivant au jour de la variable précédente (par défaut : 1)
-$datePurge = 10; // Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
+//---------------------- ParamÃ¨tres   /!\ Important
+$participantsMax = 12; // Nombre maximal de participants (par dÃ©faut : 12)
+$dateDebloquante = 15; // Jour du mois dÃ©bloquant les inscriptions du mois suivant (par dÃ©faut : le 15 du mois)
+$dateDebloLimit = 1; // Nombre de mois dÃ©bloquÃ©s en arrivant au jour de la variable prÃ©cÃ©dente (par dÃ©faut : 1)
+$datePurge = 10; // Nombre de jours avant lequel les informations sont supprimÃ©es (RGPD toussa) (par dÃ©faut : 10)
 $arraySeances = [
 	"Dimanche" => "",
 	"Lundi" => "1830",
@@ -44,7 +32,7 @@ $arraySeances = [
 	"Jeudi" => "",
 	"Vendredi" => "1830",
 	"Samedi" => "",
-]; // On liste les séances qu'on veut, on met les horaires au format HHmm, séparés par une "," , pour pouvoir les manipuler comme des nombres par la suite
+]; // On liste les sÃ©ances qu'on veut, on met les horaires au format HHmm, sÃ©parÃ©s par une "," , pour pouvoir les manipuler comme des nombres par la suite
 $arrayAnimateur = [
 	"Dimanche" => "",
 	"Lundi" => "",
@@ -53,10 +41,10 @@ $arrayAnimateur = [
 	"Jeudi" => "",
 	"Vendredi" => "Fred",
 	"Samedi" => "",
-]; // On liste les animateurs des séances
+]; // On liste les animateurs des sÃ©ances
 $arrayAdmin = [];
 include 'admins.php';
-//----------------------  Fonctions	& Pré-requis
+//----------------------  Fonctions	& PrÃ©-requis
 function getBetweenDates($startDate, $endDate)
 {
 	$rangArray = [];
@@ -77,7 +65,7 @@ function getByPostOrGet($property, $defaults) {
 	return $defaults;
 }
 
-date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
+date_default_timezone_set("Europe/Paris"); // On dÃ©finit la timezone sur notre fuseau horaire
 $dayHuman = [
 	"Dimanche",
 	"Lundi",
@@ -86,10 +74,10 @@ $dayHuman = [
 	"Jeudi",
 	"Vendredi",
 	"Samedi",
-]; // On liste les jours de la semaine en français
+]; // On liste les jours de la semaine en franÃ§ais
 $monthHuman = [
 	"Janvier",
-	"Février",
+	"FÃ©vrier",
 	"Mars",
 	"Avril",
 	"Mai",
@@ -99,60 +87,60 @@ $monthHuman = [
 	"Septembre",
 	"Octobre",
 	"Novembre",
-	"Décembre",
-]; // On liste les mois de l'année en français
+	"DÃ©cembre",
+]; // On liste les mois de l'annÃ©e en franÃ§ais
 
-// On prépare les limites
+// On prÃ©pare les limites
 $dateToday = date("Y-m-d");
-$dateTodayPieces = explode("-", $dateToday); // 0 : Année ;  1 : Mois ;  2 : jour
+$dateTodayPieces = explode("-", $dateToday); // 0 : AnnÃ©e ;  1 : Mois ;  2 : jour
 $dateTodayPiecesToHuman = $dateTodayPieces[1] - 1; // Pas envie d'en faire un int...
 $dateTodayHuman = $dateTodayPieces[2]
 	. " "
 	. $monthHuman[$dateTodayPiecesToHuman]
 	. " "
-	. $dateTodayPieces[0]; // On a la date du jour au format compréhensible
+	. $dateTodayPieces[0]; // On a la date du jour au format comprÃ©hensible
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
 if (!($xml = simplexml_load_file("data.xml"))) {
 	$smarty->assign(
 		"error_subscribe_db_message",
-		"Echec de chargement de la base de données des inscriptions"
+		"Echec de chargement de la base de donnÃ©es des inscriptions"
 	);
 }
 if (!($wl = simplexml_load_file("wl.xml"))) {
 	$smarty->assign(
 		"error_wait_list_db_message",
-		"Echec de chargement de la base de données de la liste d'attente"
+		"Echec de chargement de la base de donnÃ©es de la liste d'attente"
 	);
 }
 
-//---------------------- Grooming - On fait le ménage dans la BDD
-// On détermine la date avant laquelle toutes les entrées sont supprimées
+//---------------------- Grooming - On fait le mÃ©nage dans la BDD
+// On dÃ©termine la date avant laquelle toutes les entrÃ©es sont supprimÃ©es
 $dateDeNettoyage = date("Ymd") - $datePurge . "1830"; // On supprime 10 jours avant la date du jour
 // echo $dateDeNettoyage;
 foreach ($xml->xpath("//insc[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
 	// On mouline dans la liste des inscrits
 	$domRef = dom_import_simplexml($el);
-	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 	$dom = new DOMDocument("1.0");
 	$dom->preserveWhiteSpace = false;
-	$dom->formatOutput = true; // Préservation de la présentation
-	$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-	$dom->save("data.xml"); // On écrit le résultat
+	$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+	$dom->loadXML($xml->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+	$dom->save("data.xml"); // On Ã©crit le rÃ©sultat
 }
 
 foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
 	// On mouline dans la waiting list (WL)
 	$domRef = dom_import_simplexml($el);
-	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 	$dom = new DOMDocument("1.0");
 	$dom->preserveWhiteSpace = false;
-	$dom->formatOutput = true; // Préservation de la présentation
-	$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-	$dom->save("wl.xml"); // On écrit le résultat
+	$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+	$dom->loadXML($wl->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+	$dom->save("wl.xml"); // On Ã©crit le rÃ©sultat
 }
-//---------------------- Inscription, Désinscription et Waiting List
-// On vérifie si on a des données en POST ou en GET
+//---------------------- Inscription, DÃ©sinscription et Waiting List
+// On vÃ©rifie si on a des donnÃ©es en POST ou en GET
 $GP_name = getByPostOrGet('name', '');
 $GP_email = getByPostOrGet('email', '');
 $GP_date = getByPostOrGet('date', '');
@@ -163,9 +151,9 @@ if ($GP_name != "" && $GP_email != "") {
 	$unlockInsc = true;
 	$unlockStyle = "unlocked";
 	$urlIdentity = "?name=" . $GP_name . "&email=" . $GP_email;
-	$myURL = $baseURL . "/" . $urlIdentity; // On génère l'URL complète pour que l'utilisateur puisse le mettre en favoris
+	$myURL = $baseURL . "/" . $urlIdentity; // On gÃ©nÃ¨re l'URL complÃ¨te pour que l'utilisateur puisse le mettre en favoris
 
-	// On détermine si la personne est admin
+	// On dÃ©termine si la personne est admin
 	foreach ($arrayAdmin as $k => $v) {
 		if ($k == $GP_name && $v == $GP_email) {
 			$isAdmin = true;
@@ -176,13 +164,13 @@ if ($GP_name != "" && $GP_email != "") {
 }
 
 $action = getByPostOrGet('act', "");
-// Gestion de l'inscription à la séance
+// Gestion de l'inscription Ã  la sÃ©ance
 // Si on est sur un act ADD, alors on termine l'inscription
 if ($action == "add"
 	&& $GP_name != ""
 	&& $GP_email != ""
 	&& $GP_date != "") {
-	// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
+	// On vÃ©rifie qu'on a pas dÃ©jÃ  une inscription avec ce nom et cet email
 	$xmlWriteQuery = $xml->xpath(
 		"//insc[@email= '$GP_email' and @name='$GP_name' and @date='$GP_date']"
 	);
@@ -191,32 +179,32 @@ if ($action == "add"
 	if (count($xmlWriteQuery) > 0) {
 		$smarty->assign(
 			"error_user_message",
-			"Vous êtes déjà inscrit sur cette session"
+			"Vous Ãªtes dÃ©jÃ  inscrit sur cette session"
 		);
 	}
-	// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
+	// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrÃªte le script
 	elseif (count($xmlWriteCount) >= $participantsMax) {
 		$smarty->assign(
 			"error_user_message",
-			"Désolé ! La place a été prise le temps que vous cliquiez sur le bouton !"
+			"DÃ©solÃ© ! La place a Ã©tÃ© prise le temps que vous cliquiez sur le bouton !"
 		);
 	}
 
-	// Si on a atteint le nombre max de participant pendant le raffraichissement, on arrête le script
-	// On écrit le fichier XML pour les inscriptions
+	// Si on a atteint le nombre max de participant pendant le raffraichissement, on arrÃªte le script
+	// On Ã©crit le fichier XML pour les inscriptions
 	else {
-		$cs = $xml->addChild("insc", ""); // On ajoute une nouvelle entrée
+		$cs = $xml->addChild("insc", ""); // On ajoute une nouvelle entrÃ©e
 		$cs->addAttribute("date", $GP_date);
 		$cs->addAttribute("name", $GP_name);
 		$cs->addAttribute("email", $GP_email);
 
 		$dom = new DOMDocument("1.0");
 		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+		$dom->loadXML($xml->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+		$dom->save("data.xml"); // On Ã©crit le rÃ©sultat
 
-		// On en profite pour se retirer de la waiting list le cas échéant
+		// On en profite pour se retirer de la waiting list le cas Ã©chÃ©ant
 		foreach ($wl->xpath(
 			'//wl[ @email="'
 				. $GP_email
@@ -227,12 +215,12 @@ if ($action == "add"
 				. '"]'
 		) as $el) {
 			$domRef = dom_import_simplexml($el);
-			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 			$dom = new DOMDocument("1.0");
 			$dom->preserveWhiteSpace = false;
-			$dom->formatOutput = true; // Préservation de la présentation
-			$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-			$dom->save("wl.xml"); // On écrit le résultat
+			$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+			$dom->loadXML($wl->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+			$dom->save("wl.xml"); // On Ã©crit le rÃ©sultat
 		}
 	}
 }
@@ -249,15 +237,15 @@ if ($action == "remove" && $GP_name != "" && $GP_email != "") {
 			. '"]'
 	) as $el) {
 		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 		$dom = new DOMDocument("1.0");
 		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+		$dom->loadXML($xml->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+		$dom->save("data.xml"); // On Ã©crit le rÃ©sultat
 	}
 
-	$kp = explode("-", $GP_date); // On explose la date pour pouvoir manipuler le contenu - 0 = année, 1 = mois, 2 = jour, 3 = heure
+	$kp = explode("-", $GP_date); // On explose la date pour pouvoir manipuler le contenu - 0 = annÃ©e, 1 = mois, 2 = jour, 3 = heure
 	$kp2Trim = $kp[1] - 1; // On enleve 1 pour tomber sur l'array
 	$monthFr = $monthHuman[$kp2Trim];
 	$hourFr = substr_replace($kp[3], "h", 2, 0); // On rajoute un "H" pour une lecture facile
@@ -268,17 +256,17 @@ if ($action == "remove" && $GP_name != "" && $GP_email != "") {
 		. $monthFr
 		. " "
 		. $kp[0]
-		. " à "
+		. " Ã  "
 		. $hourFr
 		. ""; // On transforme la date
 
-	// On génère les emails pour les personnes en liste d'attente
+	// On gÃ©nÃ¨re les emails pour les personnes en liste d'attente
 	foreach ($wl->xpath('//wl[@date="' . $GP_date . '"]') as $el) {
 		$mailBody = '
 						Bonjour '
 			. $el["name"]
 			. '<br/><br/>
-						Une place vient de se libérer pour la séance d\'AVIFIT du <b>'
+						Une place vient de se libÃ©rer pour la sÃ©ance d\'AVIFIT du <b>'
 			. $dateHuman
 			. '</b> ! Une chance !<br/><br/>
 						Si la place est toujours disponible, vous pouvez utiliser le lien suivant pour la retrouver la liste des sessions : <a href="'
@@ -287,14 +275,14 @@ if ($action == "remove" && $GP_name != "" && $GP_email != "") {
 			. $el["name"]
 			. "&email="
 			. $el["email"]
-			. '" target="_blank">Liste des séances d\'Avifit disponibles BETA TEST</a>.<br/><br/>
+			. '" target="_blank">Liste des sÃ©ances d\'Avifit disponibles BETA TEST</a>.<br/><br/>
 						Ce lien vous authentifie automatiquement.<br/><br/>	
 						<i>Ce mail est automatique, NE PAS REPONDRE ! </i><br/><br/>					
-						A bientôt !';
+						A bientÃ´t !';
 
-		// On prépare le mail à envoyer pour confirmer
+		// On prÃ©pare le mail Ã  envoyer pour confirmer
 		$to = $el["email"];
-		$subject = "AS1881 - Une place vient de se libérer pour le "
+		$subject = "AS1881 - Une place vient de se libÃ©rer pour le "
 			. $dateHuman
 			. " !";
 		$message = $mailBody;
@@ -326,15 +314,15 @@ if ($action == "adminRemove"
 			. '"]'
 	) as $el) {
 		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 		$dom = new DOMDocument("1.0");
 		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+		$dom->loadXML($xml->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+		$dom->save("data.xml"); // On Ã©crit le rÃ©sultat
 	}
 
-	$kp = explode("-", $GP_date); // On explose la date pour pouvoir manipuler le contenu - 0 = année, 1 = mois, 2 = jour, 3 = heure
+	$kp = explode("-", $GP_date); // On explose la date pour pouvoir manipuler le contenu - 0 = annÃ©e, 1 = mois, 2 = jour, 3 = heure
 	$kp2Trim = $kp[1] - 1; // On enleve 1 pour tomber sur l'array
 	$monthFr = $monthHuman[$kp2Trim];
 	$hourFr = substr_replace($kp[3], "h", 2, 0); // On rajoute un "H" pour une lecture facile
@@ -345,17 +333,17 @@ if ($action == "adminRemove"
 		. $monthFr
 		. " "
 		. $kp[0]
-		. " à "
+		. " Ã  "
 		. $hourFr
 		. ""; // On transforme la date
 
-	// On génère les emails pour les personnes en liste d'attente
+	// On gÃ©nÃ¨re les emails pour les personnes en liste d'attente
 	foreach ($wl->xpath('//wl[@date="' . $GP_date . '"]') as $el) {
 		$mailBody = '
 						Bonjour '
 			. $el["name"]
 			. '<br/><br/>
-						Une place vient de se libérer pour la séance d\'AVIFIT du <b>'
+						Une place vient de se libÃ©rer pour la sÃ©ance d\'AVIFIT du <b>'
 			. $dateHuman
 			. '</b> ! Une chance !<br/><br/>
 						Si la place est toujours disponible, vous pouvez utiliser le lien suivant pour la retrouver la liste des sessions : <a href="'
@@ -364,14 +352,14 @@ if ($action == "adminRemove"
 			. $el["name"]
 			. "&email="
 			. $el["email"]
-			. '" target="_blank">Liste des séances d\'Avifit disponibles BETA TEST</a>.<br/><br/>
+			. '" target="_blank">Liste des sÃ©ances d\'Avifit disponibles BETA TEST</a>.<br/><br/>
 						Ce lien vous authentifie automatiquement.<br/><br/>	
 						<i>Ce mail est automatique, NE PAS REPONDRE ! </i><br/><br/>					
-						A bientôt !';
+						A bientÃ´t !';
 
-		// On prépare le mail à envoyer pour confirmer
+		// On prÃ©pare le mail Ã  envoyer pour confirmer
 		$to = $el["email"];
-		$subject = "AS1881 - Une place vient de se libérer pour le "
+		$subject = "AS1881 - Une place vient de se libÃ©rer pour le "
 			. $dateHuman
 			. " !";
 		$message = $mailBody;
@@ -399,12 +387,12 @@ if ($action == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
 			. '"]'
 	) as $el) {
 		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrÃ©e
 		$dom = new DOMDocument("1.0");
 		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("wl.xml"); // On écrit le résultat
+		$dom->formatOutput = true; // PrÃ©servation de la prÃ©sentation
+		$dom->loadXML($wl->asXML()); // On charge le rÃ©sultat dans un DOM Doc
+		$dom->save("wl.xml"); // On Ã©crit le rÃ©sultat
 	}
 }
 
@@ -413,56 +401,56 @@ if ($action == "waitingListAdd"
 	&& $GP_name != ""
 	&& $GP_email != ""
 	&& $GP_date != "") {
-	// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
+	// On vÃ©rifie qu'on a pas dÃ©jÃ  une inscription avec ce nom et cet email
 	$wlWriteQuery = $wl->xpath(
 		"//wl[@date= '$GP_date' and @name='$GP_name' and @email='$GP_email']"
 	);
 
 	if (count($wlWriteQuery) > 0) {
-		// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
+		// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrÃªte le script
 		$smarty->assign(
 			"error_subscribe_db_message",
-			"Vous êtes déjà inscrit sur cette liste d'attente"
+			"Vous Ãªtes dÃ©jÃ  inscrit sur cette liste d'attente"
 		);
 	}
 
-	// On écrit le fichier XML pour les inscriptions
+	// On Ã©crit le fichier XML pour les inscriptions
 	else {
-		$cs = $wl->addChild("wl", ""); // On ajoute une nouvelle entrée
+		$cs = $wl->addChild("wl", ""); // On ajoute une nouvelle entrÃ©e
 		$cs->addAttribute("date", $GP_date);
 		$cs->addAttribute("name", $GP_name);
 		$cs->addAttribute("email", $GP_email);
-		$wl->asXML("wl.xml"); // On écrit dans un fichier XML
+		$wl->asXML("wl.xml"); // On Ã©crit dans un fichier XML
 	}
 }
 
 //---------------------- Gestion des filtres
-$listFiltersInCSS = ""; // On vide le contenu qui sera envoyé dans la CSS au cas où
+$listFiltersInCSS = ""; // On vide le contenu qui sera envoyÃ© dans la CSS au cas oÃ¹
 $listFiltersInURL = ""; // On vide la liste des filtres pour commencer
 $listFiltersInHref = ""; // On vide la liste des items dans le href qu'on va faire
-$listFiltersArray = []; // On prépare un array pour stocker les statuts des filtres
+$listFiltersArray = []; // On prÃ©pare un array pour stocker les statuts des filtres
 $listFiltersI = 0;
 if ($unlockInsc != true) {
 	$urlSafety = "?anonymous";
 }
 
-// Il faut que je repasse deux fois par cette boucle pour pouvoir avoir l'état de TOUS les filtres. J'ai pas trouvé de moyen d'optimiser la chose.
+// Il faut que je repasse deux fois par cette boucle pour pouvoir avoir l'Ã©tat de TOUS les filtres. J'ai pas trouvÃ© de moyen d'optimiser la chose.
 foreach ($arraySeances as $as => $ask) {
-	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
+	$listSeanceDuJour = explode(",", $ask); // On Ã©clate la liste des horaires du jours
 
 	foreach ($listSeanceDuJour as $i) {
-		// On commence par établir l'URL pour maintenir les différents éléments à travers les manipulations
+		// On commence par Ã©tablir l'URL pour maintenir les diffÃ©rents Ã©lÃ©ments Ã  travers les manipulations
 		if ($i != "") {
 			$aski = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-			$cssFiltersName = $as . "" . $aski; // On génère le nom de la classe CSS pour l'affichage/désaffichage
+			$cssFiltersName = $as . "" . $aski; // On gÃ©nÃ¨re le nom de la classe CSS pour l'affichage/dÃ©saffichage
 			$cssFilterValue = getByPostOrGet("$cssFiltersName", '');
 			if ($cssFilterValue == "hide") {
 				$listFiltersArray[$cssFiltersName] = "hide";
-				$listFiltersI++; // On incrémente le compteur de filtre actif
+				$listFiltersI++; // On incrÃ©mente le compteur de filtre actif
 			} elseif ($cssFilterValue == "show"
 				or $cssFilterValue == "") {
-				// Le but est de récupérer les items dans l'URL, de changer l'option pour CET element, mais de garder son statut pour générer les liens suivants
-				$listFiltersInURL .= ""; // Dans l'URL actuelle, on ne mets rien si rien n'est précisé
+				// Le but est de rÃ©cupÃ©rer les items dans l'URL, de changer l'option pour CET element, mais de garder son statut pour gÃ©nÃ©rer les liens suivants
+				$listFiltersInURL .= ""; // Dans l'URL actuelle, on ne mets rien si rien n'est prÃ©cisÃ©
 				$listFiltersArray[$cssFiltersName] = "show";
 			}
 		}
@@ -471,19 +459,19 @@ foreach ($arraySeances as $as => $ask) {
 
 $listFilters = [];
 foreach ($arraySeances as $as => $ask) {
-	$listSeanceDuJour = explode(",", $ask); // On éclate la liste des horaires du jours
+	$listSeanceDuJour = explode(",", $ask); // On Ã©clate la liste des horaires du jours
 
 	foreach ($listSeanceDuJour as $i) {
-		// On commence par établir l'URL pour maintenir les différents éléments à travers les manipulations
+		// On commence par Ã©tablir l'URL pour maintenir les diffÃ©rents Ã©lÃ©ments Ã  travers les manipulations
 		if ($i != "") {
 			$aski = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
-			$cssFiltersName = $as . "" . $aski; // On génère le nom de la classe CSS pour l'affichage/désaffichage
+			$cssFiltersName = $as . "" . $aski; // On gÃ©nÃ¨re le nom de la classe CSS pour l'affichage/dÃ©saffichage
 			$listFiltersInHref = ""; // On reset l'HREF pour cette variable
 
 			// On commence une boucle avec l'array qui contient les filtres
 			foreach ($listFiltersArray as $filter => $filterkey) {
 				if ($filter != $cssFiltersName && $filterkey == "hide") {
-					// Si l'array ne correspond pas au filtre et que son statut est HIDE, on l'ajoute à l'URL pour cette phase là
+					// Si l'array ne correspond pas au filtre et que son statut est HIDE, on l'ajoute Ã  l'URL pour cette phase lÃ 
 					$listFiltersInHref .= "&" . $filter . "=hide";
 				} elseif ($filter == $cssFiltersName && $filterkey == "hide") {
 					$listFiltersInHref .= "";
@@ -499,7 +487,7 @@ foreach ($arraySeances as $as => $ask) {
 			$filter = [
 				"url" => $myURL . $listFiltersInHref,
 				"class" => $listFiltersInClass,
-				"text" => $as . " à " . $aski,
+				"text" => $as . " Ã  " . $aski,
 			];
 			array_push($listFilters, $filter);
 		}
@@ -507,12 +495,12 @@ foreach ($arraySeances as $as => $ask) {
 }
 
 //---------------------- Affichage
-// Gestion des dates affichées
-// On manipule les années
+// Gestion des dates affichÃ©es
+// On manipule les annÃ©es
 if ($dateTodayPieces[1] == 12) {
 	$dateLimitYear = $dateTodayPieces[0] + 1;
 }
-// Si on est en décembre, la limite est fixé à l'an prochain
+// Si on est en dÃ©cembre, la limite est fixÃ© Ã  l'an prochain
 else {
 	$dateLimitYear = $dateTodayPieces[0];
 }
@@ -521,47 +509,47 @@ else {
 if ($dateTodayPieces[2] >= $dateDebloquante) {
 	$dateLimitMonth = $dateTodayPieces[1] + 1 + $dateDebloLimit;
 }
-// Si on est le $dateDebloquante du mois, on décale au mois suivant
+// Si on est le $dateDebloquante du mois, on dÃ©cale au mois suivant
 else {
 	$dateLimitMonth = $dateTodayPieces[1] + $dateDebloLimit;
 }
 
 $dateLimitMonthHuman = $monthHuman[$dateLimitMonth - 2];
 
-// On définit le jour de la limite, qui sera toujours le 1er du mois suivant pour plus de facilité, et ca m'évite de prendre en compte les mois à 28, 29, 30 & 31 jours
+// On dÃ©finit le jour de la limite, qui sera toujours le 1er du mois suivant pour plus de facilitÃ©, et ca m'Ã©vite de prendre en compte les mois Ã  28, 29, 30 & 31 jours
 $dateLimitDay = 1;
 
 $dateLimit = $dateLimitYear . "-" . $dateLimitMonth . "-" . $dateLimitDay; // On reconstruit la date limite
 $dates = getBetweenDates($dateToday, $dateLimit); // On liste les dates entre aujourd'hui et la date limite
 
-$kId = 1; // On met le compteur de session à 1
+$kId = 1; // On met le compteur de session Ã  1
 
 $listCards = [];
 foreach ($dates as $k) {
 	// Boucle qui passera chaque jour en revue
 
-	$kp = explode("-", $k); // On explose la date pour pouvoir manipuler le contenu - 0 = type jour, 1 = année, 2 = mois, 3 = jour
+	$kp = explode("-", $k); // On explose la date pour pouvoir manipuler le contenu - 0 = type jour, 1 = annÃ©e, 2 = mois, 3 = jour
 	$kp2Trim = $kp[2] - 1; // On enleve 1 pour tomber sur l'array
 	$dayFr = $dayHuman[$kp[0]];
 
 	if ($arraySeances[$dayFr] != "") {
-		// Si le jour correspond à l'array du début, alors on affiche une ligne
+		// Si le jour correspond Ã  l'array du dÃ©but, alors on affiche une ligne
 
-		$listSeanceDuJour = explode(",", $arraySeances[$dayFr]); // On éclate la liste des horaires du jours
+		$listSeanceDuJour = explode(",", $arraySeances[$dayFr]); // On Ã©clate la liste des horaires du jours
 
 		foreach ($listSeanceDuJour as $i) {
 			// On formate la date en un truc pas trop moche
 			$iHuman = substr_replace($i, "h", 2, 0); // On rajoute un "H" pour une lecture facile
 
-			// On récupère les inscrits et les gens de la waiting list
+			// On rÃ©cupÃ¨re les inscrits et les gens de la waiting list
 			$dateXmlQuery = $kp[1] . "-" . $kp[2] . "-" . $kp[3] . "-" . $i; // Je reconstruit la date
 
 			// Gestion des inscrits
 			$listInscrits = []; // On reset la liste des inscrit
-			$inscMe = false; // On remet à false le fait d'être inscrit
-			foreach ($xml->xpath("//insc[@date= '$dateXmlQuery' ]") as $q) { // On query uniquement le xml pour la date demandée
+			$inscMe = false; // On remet Ã  false le fait d'Ãªtre inscrit
+			foreach ($xml->xpath("//insc[@date= '$dateXmlQuery' ]") as $q) { // On query uniquement le xml pour la date demandÃ©e
 				if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-					array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+					array_unshift($listInscrits, $q["name"]); // Si on est inscrit on met en Ã©vidence son inscription et on permet de se dÃ©sinscrire
 					$inscMe = true;
 				} else {
 					array_push($listInscrits, $q["name"]);
@@ -569,12 +557,12 @@ foreach ($dates as $k) {
 			}
 
 			// Gestion de la waiting list
-			$wlInscrits = []; // On reset la waiting list au cas où
+			$wlInscrits = []; // On reset la waiting list au cas oÃ¹
 			$wlMe = false;
-			foreach ($wl->xpath("//wl[@date= '$dateXmlQuery']") as $q) { // On query uniquement le xml pour la date demandée
+			foreach ($wl->xpath("//wl[@date= '$dateXmlQuery']") as $q) { // On query uniquement le xml pour la date demandÃ©e
 				if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-					// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
-					array_unshift($wlInscrits, $q["name"]); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
+					// Si on est prÃ©sent dans la waiting list, on indique que le statut "wlMe" est true
+					array_unshift($wlInscrits, $q["name"]); // Si on est en liste d'attente on met en Ã©vidence son inscription et on permet de se dÃ©sinscrire
 					$wlMe = true;
 				} else {
 					array_push($wlInscrits, $q["name"]);
@@ -604,7 +592,7 @@ foreach ($dates as $k) {
 		}
 	}
 }
-$kCount = $kId - 1; // On calcule le nombre de séances
+$kCount = $kId - 1; // On calcule le nombre de sÃ©ances
 
 $smarty->assign("listFiltersInCSS", $listFiltersInCSS);
 $smarty->assign("GP_name", $GP_name);
