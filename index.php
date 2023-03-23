@@ -40,7 +40,7 @@ $arrayCategories = [
 ];
 
 //---------------------- Paramètres	 /!\ Important
-$participantsMax = 12; // Nombre maximal de participants (par défaut : 12)
+$participantsMax = 2; // Nombre maximal de participants (par défaut : 12)
 $datePurge = 10; // Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
 
 $arrayAdmin = [];
@@ -371,6 +371,6 @@ $smarty->assign("dateDisplay", $listCards);
 
 $smarty->assign("listFilters", $listFilters);
 
-$smarty->display("index.tpl");
+$smarty->display("bootstrap.tpl");
 
 ?>

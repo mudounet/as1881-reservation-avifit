@@ -1,0 +1,233 @@
+
+:root {
+    --timeline-color: #2d353c;
+	--timeline-text-color: #3d4c5a;
+	--event-color: #f0f1f3;
+	
+	--bd-purple: #4c0bce;
+	--bd-violet: #712cf9;
+	--bd-accent: #ffe484;
+	--bd-violet-rgb: 112.520718,44.062154,249.437846;
+	--bd-accent-rgb: 255,228,132;
+	--bd-pink-rgb: 214,51,132;
+	--bd-teal-rgb: 32,201,151;
+	--docsearch-primary-color: var(--bd-violet);
+	--docsearch-logo-color: var(--bd-violet);
+}
+
+body{
+}
+
+main {
+	margin-top: 20px;
+}
+
+.bd-navbar {
+  padding: .75rem 0;
+  background-color: transparent;
+  background-image: linear-gradient(to bottom, rgba(var(--bd-violet-rgb), 1), rgba(var(--bd-violet-rgb), 0.95));
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15),inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+
+.cbp_tmtimeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    position: relative
+}
+
+.cbp_tmtimeline:before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    bottom: 0;
+    width: 5px;
+    background: var(--timeline-color);
+    left: 20%;
+    margin-left: -8px
+}
+
+.cbp_tmtimeline>li {
+    position: relative
+}
+
+.cbp_tmtimeline>li .empty span {
+    color: #777
+}
+
+.cbp_tmtimeline>li .cbp_tmtime {
+    display: block;
+    width: 23%;
+    padding-right: 70px;
+    position: absolute
+}
+
+.cbp_tmtimeline>li .cbp_tmtime span {
+    display: block;
+	color: var(--timeline-text-color);
+    text-align: right
+}
+
+.cbp_tmtimeline>li .cbp_tmtime span:first-child {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.cbp_tmtimeline>li .cbp_tmtime span:last-child {
+    font-size: 14px;
+	font-weight: 400;
+}
+
+.cbp_tmtimeline>li .cbp_tmtime span:only-child {
+	padding-top: 10px;
+}
+
+.cbp_tmtimeline>li .cbp_tmtime span.month {
+    font-size: 15px !important;
+	text-transform: uppercase;
+    font-weight: 700 !important;
+	padding-top: 18px;
+}
+
+.cbp_tmtimeline>li .cbp_tmlabel {
+    margin: 0 0 15px 25%;
+    background: var(--event-color);
+    padding: 0;
+    position: relative;
+    border-radius: 5px
+}
+
+.cbp_tmtimeline>li .cbp_tmlabel:after {
+    left: -20px;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-right-color: var(--bs-border-color-translucent);
+    border-width: 10px;
+    top: 10px;
+}
+
+.cbp_tmtimeline>li .cbp_tmicon {
+    width: 40px;
+    height: 40px;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    font-size: 1.4em;
+    line-height: 40px;
+    -webkit-font-smoothing: antialiased;
+    position: absolute;
+    color: #fff;
+    background: var(--event-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--timeline-color);
+    text-align: center;
+    left: 20%;
+    top: 0;
+    margin: 0 0 0 -25px
+}
+
+.cbp_tmtimeline>li .cbp_tmicon:empty {
+    width: 20px;
+    height: 20px;
+    speak: none;
+    position: absolute;
+    background: var(--event-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--timeline-color);
+    left: 20%;
+    top: 0;
+    margin: 10px 0 0 -15px
+}
+
+.cbp_tmtimeline>li .cbp_tmiconsmonth {
+    width: 16px;
+    height: 16px;
+    speak: none;
+    position: absolute;
+    background: var(--timeline-color);
+    border-radius: 50%;
+    left: 20%;
+    top: 10px;
+    margin: 12px 0 0 -13px
+}
+
+
+
+@media screen and (max-width: 992px) and (min-width: 768px) {
+    .cbp_tmtimeline>li .cbp_tmtime {
+        padding-right: 60px
+    }
+}
+
+@media screen and (max-width: 65.375em) {
+    .cbp_tmtimeline>li .cbp_tmtime span:last-child {
+        font-size: 12px
+    }
+}
+
+@media screen and (max-width: 47.2em) {
+    .cbp_tmtimeline:before {
+        display: none
+    }
+    .cbp_tmtimeline>li .cbp_tmtime {
+        width: 100%;
+        position: relative;
+        padding: 0 0 20px 0
+    }
+    .cbp_tmtimeline>li .cbp_tmtime span {
+        text-align: left
+    }
+    .cbp_tmtimeline>li .cbp_tmlabel {
+        margin: 0 0 30px 0;
+        padding: 1em;
+        font-weight: 400;
+        font-size: 95%
+    }
+    .cbp_tmtimeline>li .cbp_tmlabel:after {
+        right: auto;
+        left: 20px;
+        border-right-color: transparent;
+        border-bottom-color: var(--timeline-color);
+        top: -20px
+    }
+    .cbp_tmtimeline>li .cbp_tmicon {
+        position: relative;
+        float: right;
+        left: auto;
+        margin: -64px 5px 0 0px
+    }
+}
+
+.bg-green {
+    background-color: #50d38a !important;
+    color: #fff;
+}
+
+.bg-blush {
+    background-color: #ff758e !important;
+    color: #fff;
+}
+
+.bg-orange {
+    background-color: #ffc323 !important;
+    color: #fff;
+}
+
+.bg-info {
+    background-color: #2CA8FF !important;
+}
+
+.cbp_tmtimeline>li .cbp_tmlabel.month {
+    background: var(--event-color) url("./img/april.png") no-repeat center center !important;
+	height: 60px;
+}
+
+.cbp_tmtimeline>li .cbp_tmlabel.month:after {
+	border-right-color: transparent;
+}
