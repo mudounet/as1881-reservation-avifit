@@ -289,7 +289,7 @@ $listFilters = []; // On prépare un array pour stocker les statuts des filtres
 $quickFilterList = []; // on utilise l'index pour identifier rapidement les filtres qui sont actifs lors du filtrage des évènements
 
 foreach ($arrayCategories as $key => $texte) {
-	$filtreActif = getByPostOrGet($key, '') == 'hide' ? 1 : 0;
+	$filtreActif = getByPostOrGet($key, '') == 'on' ? 1 : 0;
 	if($filtreActif) $quickFilterList[$key] = 1;
 	
 	$filter = [

@@ -10,69 +10,81 @@
 			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 				<li class="nav-item">
 					{if $GP_name}
-					<p>Bienvenue <b>{$GP_name}</b> ({$GP_email}) !</p>
+					<p>Bienvenue <b>{$GP_name}</b> ({$GP_email}) !{if $isAdmin} <i class="bi bi-star-fill"></i>{/if}</p>
 					<p>Lien à enregistrer: <a href="{$loginURL}">{$loginURL}</a></p>
 					{else}
-					<a class="nav-link active" aria-current="page" href="#">Home</a>{/if}
+					<a class="nav-link active" aria-current="page" href="#">Home</a>
+					{/if}
 				</li>
 			</ul>
-			<div class="btn-group" role="Outils" aria-label="Vertical button group">
-				<div class="btn-group">
-					<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-						<img src="./img/filter.svg" height="24"/>
+
+			<hr class="d-lg-none text-white-50" />
+
+			<ul class="navbar-nav flex-row flex-wrap ms-md-auto">
+				<li class="nav-item col-6 col-lg-auto">
+					<button type="button" class="btn btn-link nav-link py-2 px-0 px-lg-2 d-flex" data-bs-toggle="offcanvas" data-bs-target="#filterCanvas" aria-controls="filterCanvas">
+						<i class="bi bi-funnel"></i>
 					</button>
-					<ul class="dropdown-menu">
-						<li>
-							<h6 class="dropdown-header">Affichage des catégories</h6>
-						</li>
-						<li>
-							<a class="dropdown-item" href="#"><img src="./img/add.svg" height="20"/> Filtre 1</a>
-						</li>
-						<li>
-							<a class="dropdown-item active" href="#"><img src="./img/remove.svg" height="20"/> Filtre 2</a>
-						</li>
-						<li>
-							<hr class="dropdown-divider" />
-						</li>
-						<li>
-							<a class="dropdown-item" href="#"> <img src="./img/filter-off.svg" height="20"/> Supprimer 4 filtres </a>
-						</li>
-					</ul>
-				</div>
-				{if $GP_name}
-				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-primary" aria-expanded="false">
-						<img src="./img/logout.svg"/>
+				</li>
+
+				<li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
+					<div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
+					<hr class="d-lg-none my-2 text-white-50" />
+				</li>
+
+				<li class="nav-item">
+					{if $GP_name}
+					<a type="button" class="nav-link py-2 px-0 px-lg-2" aria-expanded="false" href="{$baseURL}">
+						<i class="bi bi-box-arrow-right"></i>
+						<span class="d-lg-none ms-2">Se déconnecter</span>
+					</a>
+					{else}
+					<button type="button" class="btn btn-link nav-link py-2 px-0 px-lg-2 d-flex" data-bs-toggle="offcanvas" data-bs-target="#loginCanvas" aria-controls="loginCanvas">
+						<i class="bi bi-box-arrow-in-right"></i>
+						<span class="d-lg-none ms-2">Se connecter</span>
 					</button>
-				</div>
-				{else}
-				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-						<img src="./img/login.svg"/>
-					</button>
-				</div>
-				{/if}
-			</div>
+					{/if}
+				</li>
+			</ul>
 		</div>
 	</div>
 </nav>
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExample">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasLabel">Identification</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-<form class="form">
-<div class="mb-3">
-  <label for="formFile" class="form-label">Le nom qui apparaîtra aux autres</label>
-  <input type="text" class="form-control" placeholder="Nom d'utilisateur" value="{$GP_name}" name="name" />
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterCanvas" aria-labelledby="filterCanvas">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title">Désactiver l'affichage de...</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<form class="form" method="get" action="{$urlWithFilters}">
+			{$oneFilterActive=0}{foreach $listFilters as $filter}
+			<div class="form-check form-switch">
+				<input class="form-check-input" type="checkbox" role="switch" name="{$filter.categorie}" {if $filter.actif}checked{$oneFilterActive=$oneFilterActive+1}{/if}>
+				<label class="form-check-label" for="flexSwitchCheckDefault">{$filter.text}</label>
+			</div>
+			{/foreach}
+			<input type="submit" value="Valider les informations" class="btn btn-primary" />
+			{if $oneFilterActive > 0}<a href="{$loginURL}" class="btn btn-warning">Réinitialiser les {$oneFilterActive} filtre(s)</a>{/if}
+		</form>
+	</div>
 </div>
-<div class="mb-3">
-  <label for="formFile" class="form-label">L'email pour la liste d'attente</label>
-  <input type="email" class="form-control" placeholder="Email" name="email" value="{$GP_email}" />
-</div>
-<input type="submit" value="Valider les informations" class="btn btn-primary"/>
-				</form>
-  </div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="loginCanvas" aria-labelledby="loginCanvas">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title">Identification</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<form class="form">
+			<div class="mb-3">
+				<label for="formFile" class="form-label">Le nom qui apparaîtra aux autres</label>
+				<input type="text" class="form-control" placeholder="Nom d'utilisateur" value="{$GP_name}" name="name" />
+			</div>
+			<div class="mb-3">
+				<label for="formFile" class="form-label">L'email pour la liste d'attente</label>
+				<input type="email" class="form-control" placeholder="Email" name="email" value="{$GP_email}" />
+			</div>
+			<input type="submit" value="Valider les informations" class="btn btn-primary" />
+		</form>
+	</div>
 </div>

@@ -2,7 +2,6 @@
 {foreach $listFilters as $filter}{if $filter.actif}{$urlWithFilters=$urlWithFilters|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
 <html>
 	<head>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 		<title>AS1881 - Calendrier des évènements</title>
 		<meta charset="UTF-8">
 		<meta name="description" content="AS1881 - Calendrier des évènements">
@@ -17,6 +16,7 @@
 	</head>
 	<body>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 <link rel="stylesheet" type="text/css" href="timeline.css" />
 {include file='bootstrap-header.tpl'}
 <main>
