@@ -81,9 +81,9 @@ Aujourd'hui, nous sommes le <b>{$todayDateFr}</b> (Heure de Strasbourg)
 </li>
 				{$last_month=$card.moisFR}{$last_year=$card.annee}{/if}
 				{if $last_day ne $card.dateJour}{$displayDate=true}{$last_day=$card.dateJour}{/if}
-			{if $card.categorie eq 'CATEGORIE_SEANCES_AVIFIT'}
+			{if $card.categorie eq 'CAT_AFT'}
 {include file='bootstrap-seance-avifit.tpl'}
-			{elseif $card.categorie eq 'CATEGORIE_SEANCES_TANKARAMER'}
+			{elseif $card.categorie eq 'CAT_TNK'}
 {include file='bootstrap-seance-tank.tpl'}
 			{else}
 			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>

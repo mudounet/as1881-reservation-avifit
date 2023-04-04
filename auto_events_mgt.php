@@ -36,6 +36,7 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 	foreach ($autoEvents->weekly_event as $event) {
 		$validityStart = isset($event['valideDebut']) ? strtotime((string) $event['valideDebut']) : false;
 		$validityEnd = isset($event['valideFin']) ? strtotime((string) $event['valideFin']) : false;
+		$places = isset($event['places']) ? (int)$event['places'] : -1;
 		
 		$dayIndex = JOURS_FR[strtolower((string) $event['jour'])];
 		$id = (string) $event['autoId'];
@@ -44,6 +45,7 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 				'heureFin' => (string) $event['heureFin'],
 				'categorie' => (string) $event['categorie'],
 				'referent' => (string) $event['referent'],
+				'places' => (string)$places,
 				'autoId' => $id];
 		
 		// génération des jours de l'intervalle

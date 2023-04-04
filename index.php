@@ -35,14 +35,13 @@ $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
 
 // Type d'évènements
 $arrayCategories = [
-	"CATEGORIE_SEANCES_AVIFIT" => "Avifit",
-	"CATEGORIE_SEANCES_TANKARAMER" => "Tank à ramer",
+	"CAT_AFT" => "Avifit",
+	"CAT_TNK" => "Tank à ramer",
 	"CATEGORIE_SEANCES_COMPETITION" => "Séances compétition",
 	"CATEGORIE_SEANCES_LOISIRS" => "Séances loisirs",
 ];
 
 //---------------------- Paramètres	 /!\ Important
-$participantsMax = 2; // Nombre maximal de participants (par défaut : 12)
 $datePurge = 10; // Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
 
 $arrayAdmin = [];
@@ -57,6 +56,7 @@ function getByPostOrGet($property, $defaults) {
 function traiterFileAttente($wl, $baseURL, $GP_eventID) {
 	list($timestamp, $type) = explode("-", $GP_eventID); // On explose la date pour pouvoir manipuler le contenu - 0 = année, 1 = mois, 2 = jour, 3 = heure
 	
+	global $fmtDateComplete;
 	$dateHuman = $fmtDateComplete->format((int)$timestamp);
 
 	// On génère les emails pour les personnes en liste d'attente
@@ -124,7 +124,25 @@ foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el
 // On vérifie si on a des données en POST ou en GET
 $GP_name = getByPostOrGet('name', '');
 $GP_email = getByPostOrGet('email', '');
-$GP_eventID = getByPostOrGet('id', '');
+$GP_eventID = getByPostOrGet('id', null);
+
+$participantsMaxId = null;
+if($GP_eventID) {
+	try {
+		if (!preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches)) throw new Exception('Pas valide');
+		$match = false;
+		foreach ($eventsXml->xpath("//event[@autoId='$matches[2]' and @timestamp='$matches[1]']") as $q) { // On query uniquement le xml pour la date demandée
+			$match = true;
+			if(isset($q['places'])) $participantsMaxId = (int)$q['places'];
+		}
+		if (!$match) throw new Exception('Pas valide');
+	} catch (Exception $e) {
+		echo 'id invalide';//,  $e->getMessage(), "\n";
+		exit;
+		
+	}
+}
+
 $isAdmin = false;
 
 if ($GP_name != "" && $GP_email != "") {
@@ -161,8 +179,9 @@ if ($action == "add"
 			"Vous êtes déjà inscrit sur cette session"
 		);
 	}
+	
 	// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
-	elseif (count($xmlWriteCount) >= $participantsMax) {
+	elseif (count($xmlWriteCount) >= $participantsMaxId) {
 		$smarty->assign(
 			"error_user_message",
 			"Désolé ! La place a été prise le temps que vous cliquiez sur le bouton !"
@@ -339,6 +358,9 @@ foreach ($eventsXml->event as $event) {
 			array_push($wlInscrits, $inscrit);
 		}
 	}
+	
+	$participantsMax = null;
+	if (isset($event['places']) && (int)$event['places'] > 0) $participantsMax = (int)$event['places'];
 
 	$card = [
 		"categorie" => $event['categorie'],

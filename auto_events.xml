@@ -6,16 +6,16 @@
 "CATEGORIE_EVTS_INTERNES" => "evenements_internes",
 "CATEGORIE_EVTS_FESTIFS" => "evenements_festifs",
 "CATEGORIE_REUNIONS_ORGA" => "reunions_organisation",
-"CATEGORIE_SEANCES_AVIFIT" => "seances_avifit",
+"CAT_AFT" => "seances_avifit",
 "CATEGORIE_SEANCES_TANKARAMER" => "seances_tank_a_ramer",
 "CATEGORIE_SEANCES_LOISIRS" => "seances_loisirs",
 "CATEGORIE_SEANCES_COMPETITION" => "seances_loisirs",
  -->
 <events>
-  <weekly_event autoId="TANK_MARDI" valideDebut="2023-03-27" valideFin="2023-04-15" categorie="CATEGORIE_SEANCES_TANKARAMER" jour="mardi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
-  <weekly_event autoId="TANK_JEUDI" valideDebut="2022-03-20" valideFin="2023-03-26" categorie="CATEGORIE_SEANCES_TANKARAMER" jour="jeudi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
-  <weekly_event autoId="AVIFIT_LUNDI" categorie="CATEGORIE_SEANCES_AVIFIT" jour="lundi" heureDebut="18h30" heureFin="19h30"/>
-  <weekly_event autoId="AVIFIT_MERCREDI1" categorie="CATEGORIE_SEANCES_AVIFIT" jour="mercredi" heureDebut="18h00" heureFin="19h00" referent="JP"/>
-  <weekly_event autoId="AVIFIT_MERCREDI2" categorie="CATEGORIE_SEANCES_AVIFIT" jour="mercredi" heureDebut="19h00" heureFin="20h00" referent="JP"/>
-  <weekly_event autoId="AVIFIT_VENDREDI" categorie="CATEGORIE_SEANCES_AVIFIT" jour="vendredi" heureDebut="18h30" heureFin="19h30" referent="Fred"/>
+  <weekly_event autoId="TNK_MAR" categorie="CAT_TNK" valideDebut="2023-03-27" valideFin="2023-03-21" jour="mardi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
+  <weekly_event autoId="TNK_JEU" categorie="CAT_TNK" valideDebut="2022-03-20" valideFin="2023-03-21" jour="jeudi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
+  <weekly_event autoId="AFT_LUN" categorie="CAT_AFT" jour="lundi" heureDebut="18h30" heureFin="19h30" places="12"/>
+  <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" jour="mercredi" heureDebut="18h00" heureFin="19h00" referent="JP" places="12"/>
+  <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" jour="mercredi" heureDebut="19h00" heureFin="20h00" referent="JP" places="12"/>
+  <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" jour="vendredi" heureDebut="18h30" heureFin="19h30" referent="Fred" places="12"/>
 </events>
