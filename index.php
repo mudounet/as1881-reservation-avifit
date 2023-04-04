@@ -11,6 +11,8 @@ if ($last_exec === false || $current_time > (int)$last_exec + 43200) {
 	file_put_contents('last_exec.txt', $current_time);
 }
 
+$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
+
 /////////////////////////////////////////////////////////////////////////
 // Smarty
 /////////////////////////////////////////////////////////////////////////
@@ -54,7 +56,7 @@ function getByPostOrGet($property, $defaults) {
 
 function traiterFileAttente($wl, $baseURL, $GP_eventID) {
 	list($timestamp, $type) = explode("-", $GP_eventID); // On explose la date pour pouvoir manipuler le contenu - 0 = année, 1 = mois, 2 = jour, 3 = heure
-	$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
+	
 	$dateHuman = $fmtDateComplete->format((int)$timestamp);
 
 	// On génère les emails pour les personnes en liste d'attente
@@ -365,6 +367,8 @@ $smarty->assign("GP_email", $GP_email);
 $smarty->assign("baseURL", $baseURL); // URL sans les filtres
 $smarty->assign("loginURL", $loginURL); // URL sans les filtres et avec l'identifiant eventuel
 $smarty->assign("isAdmin", $isAdmin);
+
+$smarty->assign("todayDateFr", $fmtDateComplete->format(time()));
 
 $smarty->assign("unlockStyle", $unlockStyle);
 $smarty->assign("dateDisplay", $listCards);

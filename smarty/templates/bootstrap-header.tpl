@@ -13,7 +13,7 @@
 					<p>Bienvenue <b>{$GP_name}</b> ({$GP_email}) !{if $isAdmin} <i class="bi bi-star-fill"></i>{/if}</p>
 					<p>Lien à enregistrer: <a href="{$loginURL}">{$loginURL}</a></p>
 					{else}
-					<a class="nav-link active" aria-current="page" href="#">Home</a>
+					<a class="nav-link active" aria-current="page" href="#">Évènements de l'AS 1881</a>
 					{/if}
 				</li>
 			</ul>

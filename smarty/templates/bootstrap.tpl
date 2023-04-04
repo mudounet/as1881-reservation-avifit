@@ -65,7 +65,7 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 <time class="cbp_tmtime" datetime="2017-11-04T18:30"></time>
 <div class="cbp_tmiconsmonth">&nbsp;</div>
 <div class="cbp_tmlabel"><div class="alert alert-primary" role="alert">
-Aujourd'hui, le <span class="text-uppercase">10 Avril 2023</span>
+Aujourd'hui, nous sommes le <b>{$todayDateFr}</b> (Heure de Strasbourg)
 </div></div>
 </li>
 			{$last_month=""}
