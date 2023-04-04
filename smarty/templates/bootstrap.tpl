@@ -2,22 +2,22 @@
 {foreach $listFilters as $filter}{if $filter.actif}{$urlWithFilters=$urlWithFilters|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
 <html>
 	<head>
-		<title>AS1881 - Calendrier des évènements</title>
+		<title>AS1881 - Fil des évènements</title>
 		<meta charset="UTF-8">
-		<meta name="description" content="AS1881 - Calendrier des évènements">
+		<meta name="description" content="AS1881 - Fil des évènements">
 		<meta name="keywords" content="AS881, Avifit, Réservation, Strasbourg, Aviron, Aviron Strasbourg, Aviron Strasbourg 1881">
 		<meta name="author" content="Alexis JENNY, Guillaume MANCIET">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-		
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+		<link rel="stylesheet" type="text/css" href="timeline.css" />
 		<script>
-			history.replaceState('', 'AS1881 - Avifit - {$GP_name}', ' {$loginURL} ');
+			history.replaceState('', 'AS1881 - Fil des évènements - {$GP_name}', ' {$loginURL} ');
 		</script>
 	</head>
 	<body>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-<link rel="stylesheet" type="text/css" href="timeline.css" />
+
 {include file='bootstrap-header.tpl'}
 <main>
 <div class="container">
@@ -64,9 +64,7 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 <li>
 <time class="cbp_tmtime" datetime="2017-11-04T18:30"></time>
 <div class="cbp_tmiconsmonth">&nbsp;</div>
-<div class="cbp_tmlabel"><div class="alert alert-primary" role="alert">
-Aujourd'hui, nous sommes le <b>{$todayDateFr}</b> (Heure de Strasbourg)
-</div></div>
+<div class="cbp_tmlabel today-event">Aujourd'hui, nous sommes le <b>{$todayDateFr}</b> (Heure de Strasbourg)</div>
 </li>
 			{$last_month=""}
 			{$last_day=""}
@@ -85,6 +83,8 @@ Aujourd'hui, nous sommes le <b>{$todayDateFr}</b> (Heure de Strasbourg)
 {include file='bootstrap-seance-avifit.tpl'}
 			{elseif $card.categorie eq 'CAT_TNK'}
 {include file='bootstrap-seance-tank.tpl'}
+			{elseif $card.categorie eq 'CAT_CMT'}
+{include file='bootstrap-comite.tpl'}
 			{else}
 			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>
 			{/if}

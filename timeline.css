@@ -2,7 +2,7 @@
 :root {
     --timeline-color: #2d353c;
 	--timeline-text-color: #3d4c5a;
-	--event-color: #f0f1f3;
+	--event-color: #FFFFFF;
 	
 	--bd-purple: #4c0bce;
 	--bd-violet: #712cf9;
@@ -16,7 +16,17 @@
 }
 
 body{
-	background-color: transparent;
+	min-height: 100vh;
+
+	/* https://mdbootstrap.com/docs/standard/tools/design/gradients/ */
+    /* fallback for old browsers */
+    background: #30cfd0;
+  
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to right, rgba(48,207,208,0.5), rgba(51,8,103,0.5));
+  
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, rgba(48,207,208,0.5), rgba(51,8,103,0.5))
 }
 
 main {
@@ -26,7 +36,7 @@ main {
 .bd-navbar {
   padding: .75rem 0;
   background-color: transparent;
-  background-image: linear-gradient(to bottom, rgba(var(--bd-violet-rgb), 1), rgba(var(--bd-violet-rgb), 0.95));
+  background-image: linear-gradient(to bottom, rgba(106,133,182,1), rgba(186,200,224,0.90));
   box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15),inset 0 -1px 0 rgba(0,0,0,0.15);
 }
 
@@ -65,7 +75,7 @@ main {
 
 .cbp_tmtimeline>li .cbp_tmtime span {
     display: block;
-	color: var(--timeline-text-color);
+    color: var(--timeline-text-color);
     text-align: right
 }
 
@@ -85,30 +95,41 @@ main {
 
 .cbp_tmtimeline>li .cbp_tmtime span.month {
     font-size: 15px !important;
-	text-transform: uppercase;
+    text-transform: uppercase;
     font-weight: 700 !important;
-	padding-top: 18px;
+    padding-top: 18px;
 }
 
 .cbp_tmtimeline>li .cbp_tmlabel {
     margin: 0 0 15px 25%;
     background: var(--event-color);
-    padding: 0;
+    border-color: var(--event-color);
+    padding: 1.2em;
     position: relative;
     border-radius: 5px
 }
 
 .cbp_tmtimeline>li .cbp_tmlabel:after {
-    left: -20px;
+    left: -19px;
     border: solid transparent;
     content: " ";
     height: 0;
     width: 0;
     position: absolute;
     pointer-events: none;
-    border-right-color: var(--bs-border-color-translucent);
+    border-right-color: inherit;
     border-width: 10px;
     top: 10px;
+}
+
+.secondary-event {
+	background-color:rgba(255, 255, 255, 0.4) !important;
+	border-color:rgba(255, 255, 255, 0.4)!important;
+}
+
+.today-event {
+	background-color:rgba(63.1%, 76.9%, 99.2%, 0.4) !important;
+	border-color:rgba(63.1%, 76.9%, 99.2%, 0.4) !important;
 }
 
 .cbp_tmtimeline>li .cbp_tmicon {
@@ -194,14 +215,25 @@ main {
         right: auto;
         left: 20px;
         border-right-color: transparent;
-        border-bottom-color: var(--timeline-color);
-        top: -20px
+        border-bottom-color: inherit;
+        top: -19px
     }
     .cbp_tmtimeline>li .cbp_tmicon {
         position: relative;
         float: right;
         left: auto;
         margin: -64px 5px 0 0px
+    }
+	
+	.cbp_tmtimeline>li .cbp_tmicon:empty {
+        position: relative;
+        float: right;
+        left: auto;
+        margin: -55px 30px 0 0px;
+    }
+	
+	.cbp_tmtimeline>li .cbp_tmiconsmonth {
+       display: none;
     }
 }
 
@@ -231,4 +263,5 @@ main {
 
 .cbp_tmtimeline>li .cbp_tmlabel.month:after {
 	border-right-color: transparent;
+	border-bottom-color: transparent;
 }

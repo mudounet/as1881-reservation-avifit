@@ -13,7 +13,7 @@
 					<p>Bienvenue <b>{$GP_name}</b> ({$GP_email}) !{if $isAdmin} <i class="bi bi-star-fill"></i>{/if}</p>
 					<p>Lien à enregistrer: <a href="{$loginURL}">{$loginURL}</a></p>
 					{else}
-					<a class="nav-link active" aria-current="page" href="#">Évènements de l'AS 1881</a>
+					<a class="nav-link active" aria-current="page" href="#">Fil des évènements de l'AS 1881</a>
 					{/if}
 				</li>
 			</ul>
@@ -26,6 +26,13 @@
 						<i class="bi bi-funnel"></i>
 					</button>
 				</li>
+				{if $isAdmin}
+				<li class="nav-item col-6 col-lg-auto">
+					<button type="button" class="btn btn-link nav-link py-2 px-0 px-lg-2 d-flex" data-bs-toggle="offcanvas" data-bs-target="#addEvent" aria-controls="addEvent">
+						<i class="bi bi-calendar-event"></i>
+					</button>
+				</li>
+				{/if}
 
 				<li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
 					<div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
@@ -49,6 +56,10 @@
 		</div>
 	</div>
 </nav>
+
+{if $isAdmin}
+{include file='bootstrap-event-add.tpl'}
+{/if}
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filterCanvas" aria-labelledby="filterCanvas">
 	<div class="offcanvas-header">
