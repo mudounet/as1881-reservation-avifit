@@ -1,5 +1,7 @@
 <?php
 
+require 'functions.php';
+
 //  libxml functionality it is possible to suppress all XML errors when loading the document and then iterate over the errors. 
 libxml_use_internal_errors(true);
 
@@ -24,13 +26,12 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 	// Load the existing events from events.xml, by timestamp
 	
 	$eventsXml = simplexml_load_file('events.xml');
-	if ($eventsXml === false) $eventsXml = simplexml_load_string("<events/>");
+	if ($eventsXml === false) $eventsXml = simplexml_load_string('<?xml version="1.0"?><events/>');
 	
 	$existingAutoEvents = [];
 	foreach ($eventsXml->event as $event) {
-		$timestamp = strtotime((string)$event->date);
-		if(!isset($event->autoId)) continue; // Ce n'est pas un évènement généré automatiquement
-		$existingAutoEvents[$timestamp][(string)$event->autoId] = 1; // On se sert de l'index uniquement, donc on met n'importe quelle valeur
+		if(!isset($event['autoId'])) continue; // Ce n'est pas un évènement généré automatiquement
+		$existingAutoEvents[(string)$event['timestamp']][(string)$event['autoId']] = 1; // On se sert de l'index uniquement, donc on met n'importe quelle valeur
 	}
 	
 	foreach ($autoEvents->weekly_event as $event) {
@@ -50,37 +51,28 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 		
 		// génération des jours de l'intervalle
 		for ($timestamp = $startTimestamp; $timestamp <= $endTimestamp; $timestamp += 86400) {
-			if ($dayIndex != date('w', $timestamp)) continue; // la date de l'intervalle ne tombe pas un jour valide
+			$newEvent['date'] = date('Y-m-d', $timestamp);
+			$newEvent['timestamp'] = \DateTime::createFromFormat('Y-m-d H:i T', $newEvent['date'].' '.str_replace('h', ':', $newEvent['heureDebut']).' Europe/Paris')->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
 			
+			if ($dayIndex != date('w', $timestamp)) continue; // la date de l'intervalle ne tombe pas un jour valide	
 			if ($validityStart && $validityStart > $timestamp) continue; // Cet evènement n'est pas actif, car il n'a pas commencé
 			if ($validityEnd && $validityEnd < $timestamp) break; // la date de validité de l'évenement est dépassée, il est inutile de continuer
-			if (isset($existingAutoEvents[$timestamp][$id])) continue;  // l'évènement existe déjà dans le fichier XML d'évènements
-			
-			$newEvent['date'] = date('Y-m-d', $timestamp);
-			$newEvent['timestamp'] = \DateTime::createFromFormat('Y-m-d H:i T', $newEvent['date'].' '.str_replace('h', ':', $newEvent['heureDebut']).' Europe/Paris')->getTimestamp();
+			if (isset($existingAutoEvents[$newEvent['timestamp']][$newEvent['autoId']])) continue;  // l'évènement existe déjà dans le fichier XML d'évènements
+					
 			$newEvents[] = $newEvent;
 		}
 	}
 	
-	usort($newEvents, 'cmp'); // Sort array of events
-
-	// Write everything to new file
-	$eventsXml = new SimpleXMLElement('<?xml version="1.0"?><events/>');
+	if(!isset($newEvents)) return true; // Pas de nouveaux elements, pas besoin de continuer
 	
 	foreach ($newEvents as $event) {
-		$child = $eventsXml->addChild('event');
-		foreach( $event as $key => $value) {
-			$child->addAttribute($key, $value);
-		}
+		addEvent($event, $eventsXml);
 	}
 	
-	$result = $eventsXml->asXML('events.xml'); //saving generated xml file; 
-	return $result;
+	return saveXmlFile($eventsXml, 'events.xml');  //saving generated xml file; 
 }
 
-function cmp($a, $b){
-    return $a['timestamp'] - $b['timestamp'];
-}
+
 
 $dateActuelle = strtotime(date("Y-m-d")); // Date du jour
 generateAutoEvents($dateActuelle, $dateActuelle + DAYS_FUTURE * 60 * 60 * 24);

@@ -1,23 +1,26 @@
 <?php
 
 /////////////////////////////////////////////////////////////////////////
+// Smarty
+/////////////////////////////////////////////////////////////////////////
+
+require 'setup.php';
+require 'functions.php';
+
+/////////////////////////////////////////////////////////////////////////
 // Lancement du code automatisé toutes les demis journées
 /////////////////////////////////////////////////////////////////////////
 $current_time = time();
 $last_exec = file_get_contents('last_exec.txt');
 // Check if the current time is greater than the last time the script was executed
 if ($last_exec === false || $current_time > (int)$last_exec + 43200) {
-    include('auto_events_mgt.php');
+	require('events_mgt.php');
 	file_put_contents('last_exec.txt', $current_time);
 }
 
 $fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
 
-/////////////////////////////////////////////////////////////////////////
-// Smarty
-/////////////////////////////////////////////////////////////////////////
 
-require "setup.php";
 
 $smarty = new Smarty_Aviron();
 
@@ -103,22 +106,14 @@ foreach ($xml->xpath("//insc[ translate(@date,'-','') < $dateDeNettoyage ]") as 
 	// On mouline dans la liste des inscrits
 	$domRef = dom_import_simplexml($el);
 	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-	$dom = new DOMDocument("1.0");
-	$dom->preserveWhiteSpace = false;
-	$dom->formatOutput = true; // Préservation de la présentation
-	$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-	$dom->save("data.xml"); // On écrit le résultat
+	saveXmlFile($xml, "data.xml");
 }
 
 foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
 	// On mouline dans la waiting list (WL)
 	$domRef = dom_import_simplexml($el);
 	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-	$dom = new DOMDocument("1.0");
-	$dom->preserveWhiteSpace = false;
-	$dom->formatOutput = true; // Préservation de la présentation
-	$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-	$dom->save("wl.xml"); // On écrit le résultat
+	saveXmlFile($wl, "wl.xml");
 }
 //---------------------- Inscription, Désinscription et Waiting List
 // On vérifie si on a des données en POST ou en GET
@@ -196,21 +191,13 @@ if ($action == "add"
 		$cs->addAttribute("name", $GP_name);
 		$cs->addAttribute("email", $GP_email);
 
-		$dom = new DOMDocument("1.0");
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		saveXmlFile($xml, "data.xml");
 
 		// On en profite pour se retirer de la waiting list le cas échéant
 		foreach ($wl->xpath("//wl[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-			$dom = new DOMDocument("1.0");
-			$dom->preserveWhiteSpace = false;
-			$dom->formatOutput = true; // Préservation de la présentation
-			$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-			$dom->save("wl.xml"); // On écrit le résultat
+			saveXmlFile($wl, "wl.xml");
 		}
 	}
 }
@@ -220,11 +207,7 @@ if ($action == "remove" && $GP_name != "" && $GP_email != "" && $GP_eventID != '
 	foreach ($xml->xpath("//insc[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 		$domRef = dom_import_simplexml($el);
 		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		$dom = new DOMDocument("1.0");
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		saveXmlFile($xml, "data.xml");
 	}
 
 	traiterFileAttente($wl, $baseURL, $GP_eventID);
@@ -244,22 +227,14 @@ if ($action == "adminRemove"
 	foreach ($xml->xpath("//insc[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
 		$domRef = dom_import_simplexml($el);
 		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		$dom = new DOMDocument("1.0");
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("data.xml"); // On écrit le résultat
+		saveXmlFile($xml, "data.xml");
 	}
 	
 	// Suppression de la liste d'attente
 	foreach ($wl->xpath("//wl[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
 		$domRef = dom_import_simplexml($el);
 		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		$dom = new DOMDocument("1.0");
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($xml->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("wl.xml"); // On écrit le résultat
+		$saveXmlFile($wl, "wl.xml");
 	}
 
 	traiterFileAttente($wl, $baseURL, $GP_eventID);
@@ -271,11 +246,7 @@ if ($action == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
 	foreach ($wl->xpath("//wl[@email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 		$domRef = dom_import_simplexml($el);
 		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		$dom = new DOMDocument("1.0");
-		$dom->preserveWhiteSpace = false;
-		$dom->formatOutput = true; // Préservation de la présentation
-		$dom->loadXML($wl->asXML()); // On charge le résultat dans un DOM Doc
-		$dom->save("wl.xml"); // On écrit le résultat
+		saveXmlFile($wl, "wl.xml");
 	}
 }
 
@@ -301,7 +272,7 @@ if ($action == "waitingListAdd"
 		$cs->addAttribute("id", $GP_eventID);
 		$cs->addAttribute("name", $GP_name);
 		$cs->addAttribute("email", $GP_email);
-		$wl->asXML("wl.xml"); // On écrit dans un fichier XML
+		saveXmlFile($wl, "wl.xml");
 	}
 }
 
@@ -363,6 +334,7 @@ foreach ($eventsXml->event as $event) {
 	if (isset($event['places']) && (int)$event['places'] > 0) $participantsMax = (int)$event['places'];
 
 	$card = [
+		"timestamp" => (int)$event['timestamp'],
 		"categorie" => $event['categorie'],
 		"cardId" => $cardId,
 		"jourFR" => $weekday,
@@ -381,6 +353,13 @@ foreach ($eventsXml->event as $event) {
 	];
 
 	array_push($listCards, $card);
+}
+
+// Sort array of events
+usort($listCards, 'cmp'); 
+
+function cmp($a, $b){
+	return $a['timestamp'] - $b['timestamp'];
 }
 
 $smarty->assign("GP_name", $GP_name);
