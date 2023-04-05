@@ -18,6 +18,30 @@ define('JOURS_FR' ,[
 define('DAYS_FUTURE', 15);
 define('DAYS_PAST', 5);
 
+removeOldEvents() {
+	if (!($xml = simplexml_load_file("data.xml"))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+	if (!($wl = simplexml_load_file("wl.xml"))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+	if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
+
+	//---------------------- Grooming - On fait le ménage dans la BDD
+	// On détermine la date avant laquelle toutes les entrées sont supprimées
+	$dateDeNettoyage = date("Ymd") - DAYS_PAST . "1830"; // On supprime 10 jours avant la date du jour
+	// echo $dateDeNettoyage;
+	foreach ($xml->xpath("//insc[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
+		// On mouline dans la liste des inscrits
+		$domRef = dom_import_simplexml($el);
+		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+		saveXmlFile($xml, "data.xml");
+	}
+
+	foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
+		// On mouline dans la waiting list (WL)
+		$domRef = dom_import_simplexml($el);
+		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+		saveXmlFile($wl, "wl.xml");
+	}
+}
+
 function generateAutoEvents($startTimestamp, $endTimestamp) {
 
 	// Load the auto_events.xml file
@@ -75,6 +99,7 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 
 
 $dateActuelle = strtotime(date("Y-m-d")); // Date du jour
+removeOldEvents();
 generateAutoEvents($dateActuelle, $dateActuelle + DAYS_FUTURE * 60 * 60 * 24);
 
 ?>

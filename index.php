@@ -6,6 +6,22 @@
 
 require 'setup.php';
 require 'functions.php';
+date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
+
+// Type d'évènements
+$arrayCategories = [
+	"CAT_AFT" => "Avifit",
+	"CAT_TNK" => "Tank à ramer",
+	"CAT_PRO" => "Séances compétition",
+	"CAT_LSR" => "Séances loisirs",
+	"CAT_CMT" => "Réunions du comité",
+	"CAT_ORG" => "Réunions d'organisations"
+];
+
+//---------------------- Paramètres	 /!\ Important
+$arrayAdmin = [];
+include 'admins.php';
+$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
 
 /////////////////////////////////////////////////////////////////////////
 // Lancement du code automatisé toutes les demis journées
@@ -17,10 +33,6 @@ if ($last_exec === false || $current_time > (int)$last_exec + 43200) {
 	require('events_mgt.php');
 	file_put_contents('last_exec.txt', $current_time);
 }
-
-$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
-
-
 
 $smarty = new Smarty_Aviron();
 
@@ -36,19 +48,7 @@ $base_url = str_replace('\\', '/', $base_url);
 // put em all together to get the complete base URL
 $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
 
-// Type d'évènements
-$arrayCategories = [
-	"CAT_AFT" => "Avifit",
-	"CAT_TNK" => "Tank à ramer",
-	"CATEGORIE_SEANCES_COMPETITION" => "Séances compétition",
-	"CATEGORIE_SEANCES_LOISIRS" => "Séances loisirs",
-];
 
-//---------------------- Paramètres	 /!\ Important
-$datePurge = 10; // Nombre de jours avant lequel les informations sont supprimées (RGPD toussa) (par défaut : 10)
-
-$arrayAdmin = [];
-include 'admins.php';
 //----------------------  Fonctions	& Pré-requis
 function getByPostOrGet($property, $defaults) {
 	if (isset($property) && array_key_exists((string)$property, $_GET)) return $_GET[$property];
@@ -91,30 +91,12 @@ BODY;
 
 }
 
-date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
 if (!($xml = simplexml_load_file("data.xml"))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
 if (!($wl = simplexml_load_file("wl.xml"))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
 if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
 
-//---------------------- Grooming - On fait le ménage dans la BDD
-// On détermine la date avant laquelle toutes les entrées sont supprimées
-$dateDeNettoyage = date("Ymd") - $datePurge . "1830"; // On supprime 10 jours avant la date du jour
-// echo $dateDeNettoyage;
-foreach ($xml->xpath("//insc[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
-	// On mouline dans la liste des inscrits
-	$domRef = dom_import_simplexml($el);
-	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-	saveXmlFile($xml, "data.xml");
-}
-
-foreach ($wl->xpath("//wl[ translate(@date,'-','') < $dateDeNettoyage ]") as $el) {
-	// On mouline dans la waiting list (WL)
-	$domRef = dom_import_simplexml($el);
-	$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-	saveXmlFile($wl, "wl.xml");
-}
 //---------------------- Inscription, Désinscription et Waiting List
 // On vérifie si on a des données en POST ou en GET
 $GP_name = getByPostOrGet('name', '');
@@ -158,6 +140,12 @@ if ($GP_name != "" && $GP_email != "") {
 }
 
 $action = getByPostOrGet('act', "");
+
+if ($action == "event_add" && $isAdmin) {
+	print_r($_POST);
+	
+}
+
 // Gestion de l'inscription à la séance
 // Si on est sur un act ADD, alors on termine l'inscription
 if ($action == "add"
@@ -299,9 +287,13 @@ foreach ($eventsXml->event as $event) {
 	
 	if (isset($event['categorie']) && array_key_exists((string)$event['categorie'], $quickFilterList)) continue; // L'evènement est filtré, donc on passe à la suite
 	
-	list($year, $month, $day, $hour, $minutes, $weekday, $monthName) = explode("-", $fmt->format((int)$event['timestamp']));
+	$event_timestamp = (int)$event['timestamp'];
 	
-	$cardId = $event['timestamp'].'-'.$event['autoId'];
+	if($event_timestamp < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
+	
+	list($year, $month, $day, $hour, $minutes, $weekday, $monthName) = explode("-", $fmt->format($event_timestamp));
+	
+	$cardId = $event_timestamp.'-'.$event['autoId'];
 	
 	// Gestion des inscrits
 	$listInscrits = []; // On reset la liste des inscrit
@@ -334,7 +326,7 @@ foreach ($eventsXml->event as $event) {
 	if (isset($event['places']) && (int)$event['places'] > 0) $participantsMax = (int)$event['places'];
 
 	$card = [
-		"timestamp" => (int)$event['timestamp'],
+		"timestamp" => $event_timestamp,
 		"categorie" => $event['categorie'],
 		"cardId" => $cardId,
 		"jourFR" => $weekday,
@@ -369,7 +361,7 @@ $smarty->assign("baseURL", $baseURL); // URL sans les filtres
 $smarty->assign("loginURL", $loginURL); // URL sans les filtres et avec l'identifiant eventuel
 $smarty->assign("isAdmin", $isAdmin);
 
-$smarty->assign("todayDateFr", $fmtDateComplete->format(time()));
+$smarty->assign("todayDateFr", $fmtDateComplete->format($current_time));
 
 $smarty->assign("unlockStyle", $unlockStyle);
 $smarty->assign("dateDisplay", $listCards);
