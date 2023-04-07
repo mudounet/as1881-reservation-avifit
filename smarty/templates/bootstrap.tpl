@@ -84,6 +84,8 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 {include file='bootstrap-seance-tank.tpl'}
 			{elseif $card.categorie eq 'CAT_CMT'}
 {include file='bootstrap-comite.tpl'}
+			{elseif $card.categorie eq 'CAT_ORG'}
+{include file='bootstrap-reunion-orga.tpl'}
 			{else}
 			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>
 			{/if}

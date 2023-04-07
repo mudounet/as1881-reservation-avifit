@@ -309,56 +309,57 @@ foreach ($eventsXml->event as $event) {
 	
 	list($year, $month, $day, $hour, $minutes, $weekday, $monthName) = explode("-", $fmt->format($event_timestamp));
 	
-	$cardId = $event_timestamp.'-'.$event['autoId'];
-	
-	// Gestion des inscrits
-	$listInscrits = []; // On reset la liste des inscrit
-	$inscMe = false; // On remet à false le fait d'être inscrit
-	foreach ($xml->xpath("//insc[@id= '$cardId' ]") as $q) { // On query uniquement le xml pour la date demandée
-		$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
-		if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-			array_unshift($listInscrits, $inscrit); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
-			$inscMe = true;
-		} else {
-			array_push($listInscrits, $inscrit);
-		}
+	$card = [];
+	$card["jourFR"] = $weekday;
+	$card["dateJour"] = $day;
+	$card["moisFR"] = $monthName;
+	$card["annee"] = $year;
+	$card["mois"] = $month;
+	$CDATA = (string)$event;
+	if ((string)$event != "") $card["description"] = (string)$event; // pour récupérer CDATA
+	foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
+		if (isset($key) && $key != '') $card[$key] = $value;
 	}
 
-	// Gestion de la waiting list
-	$wlInscrits = []; // On reset la waiting list au cas où
-	$wlMe = false;
-	foreach ($wl->xpath("//wl[@id= '$cardId']") as $q) { // On query uniquement le xml pour la date demandée
-		$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
-		if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
-			// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
-			array_unshift($wlInscrits, $inscrit); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
-			$wlMe = true;
-		} else {
-			array_push($wlInscrits, $inscrit);
-		}
-	}
-	
-	$participantsMax = null;
-	if (isset($event['places']) && (int)$event['places'] > 0) $participantsMax = (int)$event['places'];
 
-	$card = [
-		"timestamp" => $event_timestamp,
-		"categorie" => $event['categorie'],
-		"cardId" => $cardId,
-		"jourFR" => $weekday,
-		"dateJour" => $day,
-		"moisFR" => $monthName,
-		"annee" => $year,
-		"mois" => $month,
-		"heureDebut" => $event['heureDebut'],
-		"heureFin" => $event['heureFin'],
-		"animateur" => $event['referent'],
-		"listInscrits" => $listInscrits,
-		"listAttenteInscrits" => $wlInscrits,
-		"participantsMax" => $participantsMax,
-		"inscMe" => $inscMe,
-		"wlMe" => $wlMe,
-	];
+
+	if (isset($event['places']) && (int)$event['places'] > 0) {
+		$cardId = $event_timestamp.'-'.$event['autoId'];
+		
+		// Gestion des inscrits
+		$listInscrits = []; // On reset la liste des inscrit
+		$inscMe = false; // On remet à false le fait d'être inscrit
+		foreach ($xml->xpath("//insc[@id= '$cardId' ]") as $q) { // On query uniquement le xml pour la date demandée
+			$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
+			if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+				array_unshift($listInscrits, $inscrit); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
+				$inscMe = true;
+			} else {
+				array_push($listInscrits, $inscrit);
+			}
+		}
+
+		// Gestion de la waiting list
+		$wlInscrits = []; // On reset la waiting list au cas où
+		$wlMe = false;
+		foreach ($wl->xpath("//wl[@id= '$cardId']") as $q) { // On query uniquement le xml pour la date demandée
+			$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
+			if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
+				// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true
+				array_unshift($wlInscrits, $inscrit); // Si on est en liste d'attente on met en évidence son inscription et on permet de se désinscrire
+				$wlMe = true;
+			} else {
+				array_push($wlInscrits, $inscrit);
+			}
+		}
+		
+		$card["cardId"] = $cardId;
+		$card["participantsMax"] = (int)$event['places'];
+		$card["listInscrits"] = $listInscrits;
+		$card["listAttenteInscrits"] = $wlInscrits;
+		$card["inscMe"] = $inscMe;
+		$card["wlMe"] = $wlMe;
+	}
 
 	array_push($listCards, $card);
 }
