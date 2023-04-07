@@ -36,6 +36,8 @@
 						// Change the button text and remove the spinner
 						button.html('Opération réussie');
 						button.removeClass('btn-primary').addClass('btn-success');
+						
+						$('#refresh_proposal').toast('show');
 					},
 					error: function(response) {
 						// Change the button text and remove the spinner
@@ -54,7 +56,14 @@
 		</script>
 	</head>
 	<body>
-
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+	<div class="toast align-items-center text-bg-primary border-0 bg-success" role="alert" aria-live="assertive" aria-atomic="true" data-delay="4000" id="refresh_proposal">
+		<div class="d-flex">
+			<div class="toast-body">L'opération demandée est un succès... Vous pouvez rafraîchir la page une fois que vous avez terminé...</div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
 {include file='bootstrap-header.tpl'}
 <main>
 <div class="container">
