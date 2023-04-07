@@ -4,7 +4,13 @@ function addEvent($event, $eventsXml) {
 	$child = $eventsXml->addChild('event'); // On ajoute une nouvelle entrée
 	
 	foreach( $event as $key => $value) {
-		$child->addAttribute($key, $value);
+		if (isset($key) && $key != '')
+			$child->addAttribute($key, $value);
+		else {
+			// Si la clef n'est pas définie... Alors on ajoute $value en tant que CDATA
+			$dom = dom_import_simplexml($child);
+			$dom->appendChild($dom->ownerDocument->createCDATASection($value)); 
+		}
 	}
 }
 

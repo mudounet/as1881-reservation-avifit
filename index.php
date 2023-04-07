@@ -142,8 +142,24 @@ if ($GP_name != "" && $GP_email != "") {
 $action = getByPostOrGet('act', "");
 
 if ($action == "event_add" && $isAdmin) {
-	print_r($_POST);
+	$referee = getByPostOrGet('referee', '');
+	$places = getByPostOrGet('places', -1);
 	
+	$event = [
+		'heureDebut' => str_replace(":", "h", $_POST['startTime']),
+		'heureFin' => str_replace(":", "h", $_POST['endTime']),
+		'categorie' => $_POST['cat'],
+		'referent' => $referee,
+		'submitter' => $GP_name,
+		'places' => $places,
+		'date' => $_POST['startDate'],
+		'titre' =>  $_POST['title'],
+		'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].' Europe/Paris')->getTimestamp(),
+		'' => $_POST['desc']
+	];
+	
+	addEvent($event, $eventsXml);
+	saveXmlFile($eventsXml, "events.xml");
 }
 
 // Gestion de l'inscription à la séance

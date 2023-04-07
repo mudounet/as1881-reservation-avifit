@@ -1,6 +1,6 @@
 <?php
 
-require 'functions.php';
+require_once 'functions.php';
 
 //  libxml functionality it is possible to suppress all XML errors when loading the document and then iterate over the errors. 
 libxml_use_internal_errors(true);
@@ -18,7 +18,7 @@ define('JOURS_FR' ,[
 define('DAYS_FUTURE', 15);
 define('DAYS_PAST', 5);
 
-removeOldEvents() {
+function removeOldEvents() {
 	if (!($xml = simplexml_load_file("data.xml"))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
 	if (!($wl = simplexml_load_file("wl.xml"))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
 	if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
