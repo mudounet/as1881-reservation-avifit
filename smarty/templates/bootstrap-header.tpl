@@ -24,12 +24,14 @@
 				<li class="nav-item col-6 col-lg-auto">
 					<button type="button" class="btn btn-link nav-link py-2 px-0 px-lg-2 d-flex" data-bs-toggle="offcanvas" data-bs-target="#filterCanvas" aria-controls="filterCanvas">
 						<i class="bi bi-funnel"></i>
+						<span class="d-lg-none ms-2">Filtrer l'affichage</span>
 					</button>
 				</li>
 				{if $isAdmin}
 				<li class="nav-item col-6 col-lg-auto">
 					<button type="button" class="btn btn-link nav-link py-2 px-0 px-lg-2 d-flex" data-bs-toggle="offcanvas" data-bs-target="#addEvent" aria-controls="addEvent">
 						<i class="bi bi-calendar-event"></i>
+						<span class="d-lg-none ms-2">Ajouter des évènements</span>
 					</button>
 				</li>
 				{/if}
