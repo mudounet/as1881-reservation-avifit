@@ -1,10 +1,11 @@
+{$inscFull=$card.participantsMax - count($card.listInscrits)}
 <li>
 <time class="cbp_tmtime" datetime="2017-11-04T03:45">{if $displayDate}<span>{$card.jourFR|upper|truncate:3:""} {$card.dateJour}</span>{/if}<span>{$card.heureDebut} - {$card.heureFin}</span></time>
 <div class="cbp_tmicon bg-orange"></div>
 <div class="cbp_tmlabel">
 
   <div class="card-body">
-  <h5 class="card-title">Séance d'avifit <span class="badge rounded-pill bg-secondary">Avifit</span></h5>{if $card.animateur ne ''}<h6 class="card-subtitle mb-2 text-muted">Animée par <b>{$card.animateur}</b></h6>{/if}
+  <h5 class="card-title">Séance d'avifit <span class="badge rounded-pill bg-secondary">Avifit</span></h5>{if $card.referent ne ''}<h6 class="card-subtitle mb-2 text-muted">Animée par <b>{$card.referent}</b></h6>{/if}
     
 	<p>Il est important de réserver sa place, de s'engager à venir, et de prévenir sur le groupe WhatsApp en cas d'impossibilité de dernière minute.</p>
 </div>
@@ -32,7 +33,7 @@
 	<a role="button" class="btn btn-primary" href="{$urlWithFilters}&id={$card.cardId}&act=add">S'inscrire</a>
 {/if}
 	{else}
-	<a role="button" class="btn btn-secondary" disabled>S'inscrire</a>
+	<a role="button" class="btn btn-secondary" title="Il faut être connecté" disabled>S'inscrire</a>
 	{/if}
   </div>
 <div>

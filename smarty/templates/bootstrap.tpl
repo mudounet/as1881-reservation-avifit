@@ -71,7 +71,6 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 			{$last_year=""}
 			{foreach $dateDisplay as $card}
 				{$displayDate=false}
-				{$inscFull=$card.participantsMax - count($card.listInscrits)}
 				{if $last_month ne $card.moisFR or $last_year ne $card.annee}<li>
 <time class="cbp_tmtime" datetime="2017-11-04T18:30"><span class="month">{$card.moisFR} {$card.annee}</span></time>
 <div class="cbp_tmiconsmonth">&nbsp;</div>
