@@ -12,8 +12,45 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 		<link rel="stylesheet" type="text/css" href="timeline.css" />
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 		<script>
 			history.replaceState('', 'AS1881 - Fil des évènements - {$GP_name}', ' {$loginURL} ');
+			
+			function sendRequest(button) {
+				// Get the button element
+				var button = $(button);
+				var id = button.data('id');
+				var operation = button.data('op');
+
+				// Disable the button
+				button.prop('disabled', true);
+
+				// Add spinner to the button
+				button.html('<span class="spinner-border spinner-border-sm" role="status"></span> chargement...');
+
+				// Send the request to the server
+				$.ajax({
+					url: "{$loginURL}&id=" + id + "&act=" + operation,
+					success: function(response) {
+						// Change the button text and remove the spinner
+						button.html('Opération réussie');
+						button.removeClass('btn-primary').addClass('btn-success');
+					},
+					error: function(response) {
+						// Change the button text and remove the spinner
+						button.html(response.responseText);
+						button.removeClass('btn-primary').addClass('btn-danger');
+
+						// Enable the button after a delay
+						setTimeout(function() {
+							button.prop('disabled', false);
+							button.html('Réessayer');
+							button.removeClass('btn-danger').addClass('btn-primary');
+						}, 3000); // 3 seconds
+					}
+				});
+}
 		</script>
 	</head>
 	<body>

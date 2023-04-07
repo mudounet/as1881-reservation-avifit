@@ -99,10 +99,12 @@ if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_lo
 
 //---------------------- Inscription, Désinscription et Waiting List
 // On vérifie si on a des données en POST ou en GET
-$GP_name = getByPostOrGet('name', '');
-$GP_email = getByPostOrGet('email', '');
+$GP_name = getByPostOrGet('name', null);
+$GP_email = getByPostOrGet('email', null);
 $GP_eventID = getByPostOrGet('id', null);
+$action = getByPostOrGet('act', null);
 
+// Vérification de l'identifiant de l'évènement s'il existe
 $participantsMaxId = null;
 if($GP_eventID) {
 	try {
@@ -114,15 +116,17 @@ if($GP_eventID) {
 		}
 		if (!$match) throw new Exception('Pas valide');
 	} catch (Exception $e) {
+		http_response_code(400); // Set the HTTP status code to 400 Bad Request
 		echo 'id invalide';//,  $e->getMessage(), "\n";
 		exit;
-		
 	}
 }
 
+# Vérification de la validité de la personne identifiée
 $isAdmin = false;
-
+$isValidUser = false;
 if ($GP_name != "" && $GP_email != "") {
+	$isValidUser = true;
 	// Si on a un post ou un get d'email et de name, l'inscription est ouverte
 	$unlockInsc = true;
 	$unlockStyle = "unlocked";
@@ -139,145 +143,143 @@ if ($GP_name != "" && $GP_email != "") {
 	$loginURL = $baseURL . "?anonymous";
 }
 
-$action = getByPostOrGet('act', "");
-
-if ($action == "event_add" && $isAdmin) {
-	$referee = getByPostOrGet('referee', '');
-	$places = getByPostOrGet('places', -1);
-	
-	$event = [
-		'heureDebut' => str_replace(":", "h", $_POST['startTime']),
-		'heureFin' => str_replace(":", "h", $_POST['endTime']),
-		'categorie' => $_POST['cat'],
-		'referent' => $referee,
-		'submitter' => $GP_name,
-		'places' => $places,
-		'date' => $_POST['startDate'],
-		'titre' =>  $_POST['title'],
-		'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].' Europe/Paris')->getTimestamp(),
-		'' => $_POST['desc']
-	];
-	
-	addEvent($event, $eventsXml);
-	saveXmlFile($eventsXml, "events.xml");
-}
-
-// Gestion de l'inscription à la séance
-// Si on est sur un act ADD, alors on termine l'inscription
-if ($action == "add"
-	&& $GP_name != ""
-	&& $GP_email != ""
-	&& $GP_eventID != "") {
-	// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
-	$xmlWriteQuery = $xml->xpath("//insc[@email= '$GP_email' and @name='$GP_name' and @id='$GP_eventID']");
-	$xmlWriteCount = $xml->xpath("//insc[@id= '$GP_eventID']"); // On compte le nombre d'inscription avant d'aller plus loin
-
-	if (count($xmlWriteQuery) > 0) {
-		$smarty->assign(
-			"error_user_message",
-			"Vous êtes déjà inscrit sur cette session"
-		);
+if ($action) {
+	if (!$isValidUser) {
+		http_response_code(401); // 401 Unauthorized: The user needs to authenticate to access the requested resource.
+		echo "Mauvaise authentification"; // Send back an error message in the response body
+		exit;
 	}
 	
-	// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
-	elseif (count($xmlWriteCount) >= $participantsMaxId) {
-		$smarty->assign(
-			"error_user_message",
-			"Désolé ! La place a été prise le temps que vous cliquiez sur le bouton !"
-		);
+	if(($action == "event_add" || $action == "adminRemove") && !$isAdmin) {
+		http_response_code(403); // 403 Forbidden: The user is authenticated, but does not have the necessary permissions to access the requested resource.
+		echo "Droits admin requis"; // Send back an error message in the response body
+		exit;	
 	}
+		
+	// Si on est sur un act REMOVE, alors on supprime le truc
+	if ($action == "adminRemove" && $isAdmin) {
+		$GP_targetName = getByPostOrGet('targetName', null);
+		$GP_targetEmail = getByPostOrGet('targetEmail', null);
+		
+		if(!$GP_targetName || !$GP_targetEmail) {
+			http_response_code(400); //400 Bad Request: The server could not understand the request due to invalid syntax or missing parameters.
+			echo "Mauvais arguments"; // Send back an error message in the response body
+			exit;	
+		}
+		
+		// Suppression de la liste normale
+		foreach ($xml->xpath("//insc[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
+			$domRef = dom_import_simplexml($el);
+			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+			saveXmlFile($xml, "data.xml");
+		}
+		
+		// Suppression de la liste d'attente
+		foreach ($wl->xpath("//wl[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
+			$domRef = dom_import_simplexml($el);
+			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+			$saveXmlFile($wl, "wl.xml");
+		}
 
-	// Si on a atteint le nombre max de participant pendant le raffraichissement, on arrête le script
-	// On écrit le fichier XML pour les inscriptions
-	else {
-		$cs = $xml->addChild("insc", ""); // On ajoute une nouvelle entrée
-		$cs->addAttribute("id", $GP_eventID);
-		$cs->addAttribute("name", $GP_name);
-		$cs->addAttribute("email", $GP_email);
+		traiterFileAttente($wl, $baseURL, $GP_eventID);
+	} elseif ($action == "event_add" && $isAdmin) {
+		$referee = getByPostOrGet('referee', '');
+		$places = getByPostOrGet('places', -1);
+		
+		$event = [
+			'heureDebut' => str_replace(":", "h", $_POST['startTime']),
+			'heureFin' => str_replace(":", "h", $_POST['endTime']),
+			'categorie' => $_POST['cat'],
+			'referent' => $referee,
+			'submitter' => $GP_name,
+			'places' => $places,
+			'date' => $_POST['startDate'],
+			'titre' =>  $_POST['title'],
+			'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].' Europe/Paris')->getTimestamp(),
+			'' => $_POST['desc']
+		];
+		
+		addEvent($event, $eventsXml);
+		saveXmlFile($eventsXml, "events.xml");
+	} elseif ($action == "add") {
+		// Gestion de l'inscription à la séance
+		// Si on est sur un act ADD, alors on termine l'inscription
+		// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
+		$xmlWriteQuery = $xml->xpath("//insc[@email= '$GP_email' and @name='$GP_name' and @id='$GP_eventID']");
+		$xmlWriteCount = $xml->xpath("//insc[@id= '$GP_eventID']"); // On compte le nombre d'inscription avant d'aller plus loin
 
-		saveXmlFile($xml, "data.xml");
+		if (count($xmlWriteQuery) > 0) { // Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
+			http_response_code(400); // Set the HTTP status code to 400 Bad Request
+			echo "Vous êtes déjà inscrit sur cette session"; // Send back an error message in the response body
+			exit;
+		} elseif (count($xmlWriteCount) >= $participantsMaxId) {
+			http_response_code(400); // Set the HTTP status code to 400 Bad Request
+			echo "Dernière place prise"; // Send back an error message in the response body
+			exit;
+		}
 
-		// On en profite pour se retirer de la waiting list le cas échéant
-		foreach ($wl->xpath("//wl[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
+		// Si on a atteint le nombre max de participant pendant le raffraichissement, on arrête le script
+		// On écrit le fichier XML pour les inscriptions
+		else {
+			$cs = $xml->addChild("insc", ""); // On ajoute une nouvelle entrée
+			$cs->addAttribute("id", $GP_eventID);
+			$cs->addAttribute("name", $GP_name);
+			$cs->addAttribute("email", $GP_email);
+
+			saveXmlFile($xml, "data.xml");
+
+			// On en profite pour se retirer de la waiting list le cas échéant
+			foreach ($wl->xpath("//wl[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
+				$domRef = dom_import_simplexml($el);
+				$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+				saveXmlFile($wl, "wl.xml");
+			}
+		}
+	} elseif ($action == "remove") { // Si on est sur un act REMOVE, alors on supprime le truc
+		foreach ($xml->xpath("//insc[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
+			$domRef = dom_import_simplexml($el);
+			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
+			saveXmlFile($xml, "data.xml");
+		}
+
+		traiterFileAttente($wl, $baseURL, $GP_eventID);
+	} elseif ($action == "waitingListRemove") {
+		// Gestion de la waiting list
+		// Si on est sur un act waitinListRemove, alors on supprime le truc
+		foreach ($wl->xpath("//wl[@email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
 			saveXmlFile($wl, "wl.xml");
 		}
-	}
-}
+	} elseif ($action == "waitingListAdd") {
+		// Si on est sur un act waitingListADD, alors on y go
+		// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
+		$wlWriteQuery = $wl->xpath("//wl[@id='$GP_eventID' and @name='$GP_name' and @email='$GP_email']");
 
-// Si on est sur un act REMOVE, alors on supprime le truc
-if ($action == "remove" && $GP_name != "" && $GP_email != "" && $GP_eventID != '') {
-	foreach ($xml->xpath("//insc[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
-		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		saveXmlFile($xml, "data.xml");
-	}
+		if (count($wlWriteQuery) > 0) {
+			// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
+			http_response_code(400); // Set the HTTP status code to 400 Bad Request
+			echo "Vous êtes déjà inscrit sur cette liste"; // Send back an error message in the response body
+			exit;
+		}
 
-	traiterFileAttente($wl, $baseURL, $GP_eventID);
-}
-
-$GP_targetName = getByPostOrGet('targetName', "");
-$GP_targetEmail = getByPostOrGet('targetEmail', "");
-
-// Si on est sur un act REMOVE, alors on supprime le truc
-if ($action == "adminRemove"
-	&& $GP_targetName != ""
-	&& $GP_targetEmail != ""
-	&& $GP_eventID != ''
-	&& $isAdmin == true) {
-	
-	// Suppression de la liste normale
-	foreach ($xml->xpath("//insc[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
-		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		saveXmlFile($xml, "data.xml");
+		// On écrit le fichier XML pour les inscriptions
+		else {
+			$cs = $wl->addChild("wl", ""); // On ajoute une nouvelle entrée
+			$cs->addAttribute("id", $GP_eventID);
+			$cs->addAttribute("name", $GP_name);
+			$cs->addAttribute("email", $GP_email);
+			saveXmlFile($wl, "wl.xml");
+		}
+	} else {
+		http_response_code(400); // Set the HTTP status code to 400 Bad Request
+		echo "L'action demandée n'existe pas"; // Send back an error message in the response body
+		exit;
 	}
 	
-	// Suppression de la liste d'attente
-	foreach ($wl->xpath("//wl[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
-		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		$saveXmlFile($wl, "wl.xml");
-	}
-
-	traiterFileAttente($wl, $baseURL, $GP_eventID);
-}
-
-// Gestion de la waiting list
-// Si on est sur un act waitinListRemove, alors on supprime le truc
-if ($action == "waitingListRemove" && $GP_name != "" && $GP_email != "") {
-	foreach ($wl->xpath("//wl[@email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
-		$domRef = dom_import_simplexml($el);
-		$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-		saveXmlFile($wl, "wl.xml");
-	}
-}
-
-// Si on est sur un act waitingListADD, alors on y go
-if ($action == "waitingListAdd"
-	&& $GP_name != ""
-	&& $GP_email != ""
-	&& $GP_eventID != "") {
-	// On vérifie qu'on a pas déjà une inscription avec ce nom et cet email
-	$wlWriteQuery = $wl->xpath("//wl[@id='$GP_eventID' and @name='$GP_name' and @email='$GP_email']");
-
-	if (count($wlWriteQuery) > 0) {
-		// Si on trouve une inscription dans cette date avec ce nom et cet email, on arrête le script
-		$smarty->assign(
-			"error_subscribe_db_message",
-			"Vous êtes déjà inscrit sur cette liste d'attente"
-		);
-	}
-
-	// On écrit le fichier XML pour les inscriptions
-	else {
-		$cs = $wl->addChild("wl", ""); // On ajoute une nouvelle entrée
-		$cs->addAttribute("id", $GP_eventID);
-		$cs->addAttribute("name", $GP_name);
-		$cs->addAttribute("email", $GP_email);
-		saveXmlFile($wl, "wl.xml");
-	}
+	http_response_code(200); // Opération réussie
+	echo "L'action demandée a réussie"; // Send back an error message in the response body
+	exit;
 }
 
 //---------------------- Gestion des filtres
@@ -316,7 +318,7 @@ foreach ($eventsXml->event as $event) {
 	$card["annee"] = $year;
 	$card["mois"] = $month;
 	$CDATA = (string)$event;
-	if ((string)$event != "") $card["description"] = (string)$event; // pour récupérer CDATA
+	if ((string)$event != "") $card["description"] = nl2br((string)$event); // pour récupérer CDATA
 	foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
 		if (isset($key) && $key != '') $card[$key] = $value;
 	}

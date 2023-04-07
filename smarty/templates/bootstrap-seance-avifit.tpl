@@ -24,16 +24,17 @@
 	</div>{/if}
 	{if $GP_name}
 {if $card.wlMe}
-	<a role="button" class="btn btn-warning" href="{$urlWithFilters}&id={$card.cardId}&act=waitingListRemove">Se retirer de la liste</a>
+	<button class="btn btn-warning" onclick="sendRequest(this)" data-id="{$card.cardId}" data-op="waitingListRemove">Se retirer de la liste</button>
 {elseif $card.inscMe}
-	<a role="button" class="btn btn-success" href="{$urlWithFilters}&id={$card.cardId}&act=remove">Se désinscrire</a>
+	<button class="btn btn-success" onclick="sendRequest(this)" data-id="{$card.cardId}" data-op="remove">Se désinscrire</button>
 {elseif $inscFull<=0}
-	<a role="button" class="btn btn-primary" href="{$urlWithFilters}&id={$card.cardId}&act=waitingListAdd">S'ajouter à la liste</a>
+	<button class="btn btn-primary" onclick="sendRequest(this)" data-id="{$card.cardId}" data-op="waitingListAdd">S'ajouter à la liste</button>
 {else}
-	<a role="button" class="btn btn-primary" href="{$urlWithFilters}&id={$card.cardId}&act=add">S'inscrire</a>
+	<button class="btn btn-primary" onclick="sendRequest(this)" data-id="{$card.cardId}" data-op="add">S'inscrire</button>
 {/if}
+	</form>
 	{else}
-	<a role="button" class="btn btn-secondary" title="Il faut être connecté" disabled>S'inscrire</a>
+	<a role="button" class="btn btn-secondary" title="Il faut être connecté" data-bs-toggle="offcanvas" data-bs-target="#loginCanvas" aria-controls="loginCanvas">S'inscrire</a>
 	{/if}
   </div>
 <div>
