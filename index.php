@@ -96,12 +96,8 @@ $participantsMaxId = null;
 if($GP_eventID) {
 	try {
 		if (!preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches)) throw new Exception("'$GP_eventID' Pas valide" );
-		$match = false;
-		foreach ($eventsXml->xpath("//event[@autoId='$matches[2]' and @time_start_sxb='$matches[1]']") as $q) { // On query uniquement le xml pour la date demandée
-			$match = true;
-			if(isset($q['places'])) $participantsMaxId = (int)$q['places'];
-		}
-		if (!$match) throw new Exception('Pas valide');
+		$q = getEvent($eventsXml, $matches[1], $matches[2]); // On query uniquement le xml pour la date demandée
+		if(isset($q['places'])) $participantsMaxId = (int)$q['places'];
 	} catch (Exception $e) {
 		http_response_code(400); // Set the HTTP status code to 400 Bad Request
 		echo 'id invalide : '.$e->getMessage();//,  $e->getMessage(), "\n";
@@ -137,7 +133,7 @@ if ($action) {
 		exit;
 	}
 	
-	if(($action == "event_add" || $action == "adminRemove") && !$isAdmin) {
+	if(($action == "event_add" || $action == "adminRemove" || $action == "event_get_raw" || $action == "event_edit") && !$isAdmin) {
 		http_response_code(403); // 403 Forbidden: The user is authenticated, but does not have the necessary permissions to access the requested resource.
 		echo "Droits admin requis"; // Send back an error message in the response body
 		exit;	
@@ -186,6 +182,34 @@ if ($action) {
 		
 		addEvent($event, $eventsXml);
 		saveXmlFile($eventsXml, EVENT_FILE);
+	} elseif ($action == 'event_edit' && $isAdmin) {
+		unset($_POST['act']);
+		if(isset($_POST["CDATA"]) && $_POST["CDATA"] !=  '') $_POST[''] = $_POST["CDATA"];
+		
+		$event = getEvent($eventsXml, $_POST['time_start_sxb'], $_POST['autoId']);
+		editEvent($eventsXml, $event, $_POST);
+		
+		// Redirect to the same page with the query string
+		header("Location: $baseURL$_SERVER[REQUEST_URI]");
+		exit;
+	} elseif ($action == 'event_get_raw' && $isAdmin) {
+		preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches);
+		
+		$event = getEvent($eventsXml, $matches[1], $matches[2]); // On query uniquement le xml pour la date demandée
+		$result = [];
+		$result["CDATA"] = (string)$event; // pour récupérer CDATA
+		foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
+			if (isset($key) && $key != '') $result[$key] = (string)$value;
+		}
+		
+		if(!isset($result['disactivation'])) $result['disactivation'] = '';
+		
+		// Set Content-Type header to application/json
+		header('Content-Type: application/json');
+
+		// Return event data as JSON
+		echo json_encode($result);
+		exit;
 	} elseif ($action == "add") {
 		// Gestion de l'inscription à la séance
 		// Si on est sur un act ADD, alors on termine l'inscription
