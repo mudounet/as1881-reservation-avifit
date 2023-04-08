@@ -4,8 +4,8 @@
 // Smarty
 /////////////////////////////////////////////////////////////////////////
 
-require 'setup.php';
-require 'functions.php';
+require_once 'setup_smarty.php';
+require_once 'functions.php';
 date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
 
 // Type d'évènements
