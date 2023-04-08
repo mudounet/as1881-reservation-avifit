@@ -60,7 +60,7 @@
 </nav>
 
 {if $isAdmin}
-{include file='bootstrap-event-add.tpl'}
+{include file='bootstrap-admin.tpl'}
 {/if}
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filterCanvas" aria-labelledby="filterCanvas">
