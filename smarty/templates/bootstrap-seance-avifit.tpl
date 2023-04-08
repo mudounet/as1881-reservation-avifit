@@ -32,9 +32,8 @@
 {else}
 	<button class="btn btn-primary" onclick="sendRequest(this)" data-id="{$card.cardId}" data-op="add">S'inscrire</button>
 {/if}
-	</form>
 	{else}
-	<a role="button" class="btn btn-secondary" title="Il faut être connecté" data-bs-toggle="offcanvas" data-bs-target="#loginCanvas" aria-controls="loginCanvas">S'inscrire</a>
+	<button class="btn btn-secondary" title="Il faut être connecté" data-bs-toggle="offcanvas" data-bs-target="#loginCanvas" aria-controls="loginCanvas">S'inscrire</button>
 	{/if}
   </div>
 <div>

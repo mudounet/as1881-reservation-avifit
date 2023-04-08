@@ -1,6 +1,7 @@
+<!DOCTYPE html>
 {$urlWithFilters=$loginURL}
 {foreach $listFilters as $filter}{if $filter.actif}{$urlWithFilters=$urlWithFilters|cat:'&'|cat:$filter.categorie|cat:'=hide'}{/if}{/foreach}
-<html>
+<html lang="fr">
 	<head>
 		<title>AS1881 - Fil des évènements</title>
 		<meta charset="UTF-8">

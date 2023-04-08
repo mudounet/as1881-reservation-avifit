@@ -73,7 +73,7 @@
 			{$oneFilterActive=0}{foreach $listFilters as $filter}
 			<div class="form-check form-switch">
 				<input class="form-check-input" type="checkbox" role="switch" name="{$filter.categorie}" {if $filter.actif}checked{$oneFilterActive=$oneFilterActive+1}{/if}>
-				<label class="form-check-label" for="flexSwitchCheckDefault">{$filter.text}</label>
+				<label class="form-check-label">{$filter.text}</label>
 			</div>
 			{/foreach}
 			<input type="submit" value="Valider les informations" class="btn btn-primary" />
@@ -90,11 +90,11 @@
 	<div class="offcanvas-body">
 		<form class="form">
 			<div class="mb-3">
-				<label for="formFile" class="form-label">Le nom qui apparaîtra aux autres</label>
+				<label class="form-label">Le nom qui apparaîtra aux autres</label>
 				<input type="text" class="form-control" placeholder="Nom d'utilisateur" value="{$GP_name}" name="name" />
 			</div>
 			<div class="mb-3">
-				<label for="formFile" class="form-label">L'email pour la liste d'attente</label>
+				<label class="form-label">L'email pour la liste d'attente</label>
 				<input type="email" class="form-control" placeholder="Email" name="email" value="{$GP_email}" />
 			</div>
 			<input type="submit" value="Valider les informations" class="btn btn-primary" />
