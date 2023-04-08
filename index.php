@@ -95,16 +95,16 @@ $action = getByPostOrGet('act', null);
 $participantsMaxId = null;
 if($GP_eventID) {
 	try {
-		if (!preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches)) throw new Exception('Pas valide');
+		if (!preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches)) throw new Exception("'$GP_eventID' Pas valide" );
 		$match = false;
-		foreach ($eventsXml->xpath("//event[@autoId='$matches[2]' and @timestamp='$matches[1]']") as $q) { // On query uniquement le xml pour la date demandée
+		foreach ($eventsXml->xpath("//event[@autoId='$matches[2]' and @time_start_sxb='$matches[1]']") as $q) { // On query uniquement le xml pour la date demandée
 			$match = true;
 			if(isset($q['places'])) $participantsMaxId = (int)$q['places'];
 		}
 		if (!$match) throw new Exception('Pas valide');
 	} catch (Exception $e) {
 		http_response_code(400); // Set the HTTP status code to 400 Bad Request
-		echo 'id invalide';//,  $e->getMessage(), "\n";
+		echo 'id invalide : '.$e->getMessage();//,  $e->getMessage(), "\n";
 		exit;
 	}
 }
@@ -174,8 +174,8 @@ if ($action) {
 		$places = getByPostOrGet('places', -1);
 		
 		$event = [
-			'time_start_sxb' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].TIMEZONE)->getTimestamp(),
-			'time_end_sxb' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['endTime'].TIMEZONE)->getTimestamp(),
+			'time_start_sxb' => generateTimeStamp($_POST['startDate'], $_POST['startTime'], TIMEZONE),
+			'time_end_sxb' => generateTimeStamp($_POST['startDate'],$_POST['endTime'], TIMEZONE),
 			'categorie' => $_POST['cat'],
 			'referent' => $referee,
 			'submitter' => $GP_name,

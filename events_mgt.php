@@ -59,8 +59,8 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 		// génération des jours de l'intervalle
 		for ($timestamp = $startTimestamp; $timestamp <= $endTimestamp; $timestamp += 86400) {
 			$date = date('Y-m-d', $timestamp);
-			$newEvent['time_start_sxb'] = \DateTime::createFromFormat('Y-m-d H:i T', $date.' '.$event['heureDebut'].TIMEZONE)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
-			$newEvent['time_end_sxb'] = \DateTime::createFromFormat('Y-m-d H:i T', $date.' '.$event['heureFin'].TIMEZONE)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
+			$newEvent['time_start_sxb'] = generateTimeStamp($date, $event['heureDebut'], TIMEZONE);
+			$newEvent['time_end_sxb'] = generateTimeStamp($date, $event['heureFin'], TIMEZONE);
 
 			if ($dayIndex != date('w', $timestamp)) continue; // la date de l'intervalle ne tombe pas un jour valide	
 			if ($validityStart && $validityStart > $timestamp) continue; // Cet evènement n'est pas actif, car il n'a pas commencé

@@ -14,6 +14,10 @@ function addEvent($event, $eventsXml) {
 	}
 }
 
+function generateTimeStamp($date, $time, $timezone) {
+	return \DateTime::createFromFormat('Y-m-d H:i T', $date.' '.$time.' '.$timezone)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
+}
+
 function saveXmlFile($xml, $file) {
 	$dom = new DOMDocument("1.0");
 	$dom->preserveWhiteSpace = false;
