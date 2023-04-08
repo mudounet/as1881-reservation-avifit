@@ -12,10 +12,10 @@
 "CATEGORIE_SEANCES_COMPETITION" => "seances_loisirs",
  -->
 <events>
-  <weekly_event autoId="TNK_MAR" categorie="CAT_TNK" valideDebut="2023-03-27" valideFin="2023-03-21" jour="mardi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
-  <weekly_event autoId="TNK_JEU" categorie="CAT_TNK" valideDebut="2022-03-20" valideFin="2023-03-21" jour="jeudi" heureDebut="17h00" heureFin="20h00" referent="Pierre"/>
-  <weekly_event autoId="AFT_LUN" categorie="CAT_AFT" jour="lundi" heureDebut="18h30" heureFin="19h30" places="12"/>
-  <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" jour="mercredi" heureDebut="18h00" heureFin="19h00" referent="JP" places="12"/>
-  <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" jour="mercredi" heureDebut="19h00" heureFin="20h00" referent="JP" places="12"/>
-  <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" jour="vendredi" heureDebut="18h30" heureFin="19h30" referent="Fred" places="12"/>
+  <weekly_event autoId="TNK_MAR" categorie="CAT_TNK" valideDebut="2023-03-27" valideFin="2023-03-21" jour="mardi" heureDebut="17:00" heureFin="20:00" referent="Pierre"/>
+  <weekly_event autoId="TNK_JEU" categorie="CAT_TNK" valideDebut="2022-03-20" valideFin="2023-03-21" jour="jeudi" heureDebut="17:00" heureFin="20:00" referent="Pierre"/>
+  <weekly_event autoId="AFT_LUN" categorie="CAT_AFT" jour="lundi" heureDebut="18:30" heureFin="19:30" places="12" referent="Indoor Santé"/>
+  <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" jour="mercredi" heureDebut="18:00" heureFin="19:00" referent="JP" places="12"/>
+  <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" jour="mercredi" heureDebut="19:00" heureFin="20:00" referent="JP" places="12"/>
+  <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" jour="vendredi" heureDebut="18:30" heureFin="19:30" referent="Fred" places="12"/>
 </events>

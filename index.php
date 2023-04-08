@@ -44,10 +44,10 @@ function getByPostOrGet($property, $defaults) {
 }
 
 function traiterFileAttente($wl, $baseURL, $GP_eventID) {
-	list($timestamp, $type) = explode("-", $GP_eventID); // On explose la date pour pouvoir manipuler le contenu - 0 = année, 1 = mois, 2 = jour, 3 = heure
+	list($start_timestamp, $type) = explode("-", $GP_eventID); // On explose l'identifiant pour pouvoir manipuler le contenu
 	
 	global $fmtDateComplete;
-	$dateHuman = $fmtDateComplete->format((int)$timestamp);
+	$dateHuman = $fmtDateComplete->format((int)$start_timestamp);
 
 	// On génère les emails pour les personnes en liste d'attente
 	foreach ($wl->xpath("//wl[@id='$GP_eventID']") as $el) {
@@ -174,15 +174,13 @@ if ($action) {
 		$places = getByPostOrGet('places', -1);
 		
 		$event = [
-			'heureDebut' => str_replace(":", "h", $_POST['startTime']),
-			'heureFin' => str_replace(":", "h", $_POST['endTime']),
+			'time_start_sxb' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].TIMEZONE)->getTimestamp(),
+			'time_end_sxb' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['endTime'].TIMEZONE)->getTimestamp(),
 			'categorie' => $_POST['cat'],
 			'referent' => $referee,
 			'submitter' => $GP_name,
 			'places' => $places,
-			'date' => $_POST['startDate'],
 			'titre' =>  $_POST['title'],
-			'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].TIMEZONE)->getTimestamp(),
 			'' => $_POST['desc']
 		];
 		
@@ -292,23 +290,29 @@ foreach ($eventsXml->event as $event) {
 	
 	if (isset($event['categorie']) && array_key_exists((string)$event['categorie'], $quickFilterList)) continue; // L'evènement est filtré, donc on passe à la suite
 	
-	$event_timestamp = (int)$event['timestamp'];
+	$event_timestamp = (int)$event['time_start_sxb'];
 	
 	if($event_timestamp < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
 	
-	list($year, $month, $day, $hour, $minutes, $weekday, $monthName) = explode("-", $fmt->format($event_timestamp));
+	list($start_year, $start_month, $start_day, $start_hour, $start_minutes, $start_weekday, $start_monthName) = explode("-", $fmt->format($event_timestamp));
+	list(,,, $end_hour, $end_minutes,,) = explode("-", $fmt->format((int)$event['time_end_sxb']));
 	
 	$card = [];
-	$card["jourFR"] = $weekday;
-	$card["dateJour"] = $day;
-	$card["moisFR"] = $monthName;
-	$card["annee"] = $year;
-	$card["mois"] = $month;
+	$card["jourFR"] = $start_weekday;
+	$card["heureDebut"] = $start_hour.'h'.$start_minutes;
+	$card["heureFin"] = $end_hour.'h'.$end_minutes;
+	$card["dateJour"] = $start_day;
+	$card["moisFR"] = $start_monthName;
+	$card["annee"] = $start_year;
+	$card["mois"] = $start_month;
+	$card["heureDebut"] = $start_hour.'h'.$start_minutes;
+	$card["heureFin"] = $end_hour.'h'.$end_minutes;
 	$CDATA = (string)$event;
 	if ((string)$event != "") $card["description"] = nl2br((string)$event); // pour récupérer CDATA
 	foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
 		if (isset($key) && $key != '') $card[$key] = $value;
 	}
+
 
 
 
@@ -357,7 +361,7 @@ foreach ($eventsXml->event as $event) {
 usort($listCards, 'cmp'); 
 
 function cmp($a, $b){
-	return $a['timestamp'] - $b['timestamp'];
+	return $a['time_start_sxb'] - $b['time_start_sxb'];
 }
 
 $smarty->assign("GP_name", $GP_name);

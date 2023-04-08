@@ -40,7 +40,7 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 	$existingAutoEvents = [];
 	foreach ($eventsXml->event as $event) {
 		if(!isset($event['autoId'])) continue; // Ce n'est pas un évènement généré automatiquement
-		$existingAutoEvents[(string)$event['timestamp']][(string)$event['autoId']] = 1; // On se sert de l'index uniquement, donc on met n'importe quelle valeur
+		$existingAutoEvents[(string)$event['time_start_sxb']][(string)$event['autoId']] = 1; // On se sert de l'index uniquement, donc on met n'importe quelle valeur
 	}
 	
 	foreach ($autoEvents->weekly_event as $event) {
@@ -51,8 +51,6 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 		$dayIndex = JOURS_FR[strtolower((string) $event['jour'])];
 		$id = (string) $event['autoId'];
 		$newEvent = [
-				'heureDebut' => (string) $event['heureDebut'],
-				'heureFin' => (string) $event['heureFin'],
 				'categorie' => (string) $event['categorie'],
 				'referent' => (string) $event['referent'],
 				'places' => (string)$places,
@@ -60,13 +58,14 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 		
 		// génération des jours de l'intervalle
 		for ($timestamp = $startTimestamp; $timestamp <= $endTimestamp; $timestamp += 86400) {
-			$newEvent['date'] = date('Y-m-d', $timestamp);
-			$newEvent['timestamp'] = \DateTime::createFromFormat('Y-m-d H:i T', $newEvent['date'].' '.str_replace('h', ':', $newEvent['heureDebut']).TIMEZONE)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
-			
+			$date = date('Y-m-d', $timestamp);
+			$newEvent['time_start_sxb'] = \DateTime::createFromFormat('Y-m-d H:i T', $date.' '.$event['heureDebut'].TIMEZONE)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
+			$newEvent['time_end_sxb'] = \DateTime::createFromFormat('Y-m-d H:i T', $date.' '.$event['heureFin'].TIMEZONE)->getTimestamp(); // Creation du timestamp en tenant compte de l'heure et du decalage horaire
+
 			if ($dayIndex != date('w', $timestamp)) continue; // la date de l'intervalle ne tombe pas un jour valide	
 			if ($validityStart && $validityStart > $timestamp) continue; // Cet evènement n'est pas actif, car il n'a pas commencé
 			if ($validityEnd && $validityEnd < $timestamp) break; // la date de validité de l'évenement est dépassée, il est inutile de continuer
-			if (isset($existingAutoEvents[$newEvent['timestamp']][$newEvent['autoId']])) continue;  // l'évènement existe déjà dans le fichier XML d'évènements
+			if (isset($existingAutoEvents[$newEvent['time_start_sxb']][$newEvent['autoId']])) continue;  // l'évènement existe déjà dans le fichier XML d'évènements
 					
 			$newEvents[] = $newEvent;
 		}
