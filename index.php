@@ -1,37 +1,24 @@
 <?php
 
-/////////////////////////////////////////////////////////////////////////
-// Smarty
-/////////////////////////////////////////////////////////////////////////
-
+require_once 'globals.php';
 require_once 'setup_smarty.php';
 require_once 'functions.php';
-date_default_timezone_set("Europe/Paris"); // On définit la timezone sur notre fuseau horaire
-
-// Type d'évènements
-$arrayCategories = [
-	"CAT_AFT" => "Avifit",
-	"CAT_TNK" => "Tank à ramer",
-	"CAT_PRO" => "Séances compétition",
-	"CAT_LSR" => "Séances loisirs",
-	"CAT_CMT" => "Réunions du comité",
-	"CAT_ORG" => "Réunions d'organisations"
-];
 
 //---------------------- Paramètres	 /!\ Important
 $arrayAdmin = [];
 include 'admins.php';
-$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
+
+$fmtDateComplete = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, TIMEZONE,IntlDateFormatter::GREGORIAN,'eeee dd MMMM yyyy à HH:mm');
 
 /////////////////////////////////////////////////////////////////////////
 // Lancement du code automatisé toutes les demis journées
 /////////////////////////////////////////////////////////////////////////
 $current_time = time();
-$last_exec = file_get_contents('last_exec.txt');
+$last_exec = file_get_contents(LAST_EXEC_FILE);
 // Check if the current time is greater than the last time the script was executed
 if ($last_exec === false || $current_time > (int)$last_exec + 43200) {
-	require('events_mgt.php');
-	file_put_contents('last_exec.txt', $current_time);
+	require_once 'events_mgt.php';
+	file_put_contents(LAST_EXEC_FILE, $current_time);
 }
 
 $smarty = new Smarty_Aviron();
@@ -93,9 +80,9 @@ BODY;
 
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
-if (!($xml = simplexml_load_file("data.xml"))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
-if (!($wl = simplexml_load_file("wl.xml"))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
-if (!($eventsXml = simplexml_load_file('events.xml'))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
+if (!($xml = simplexml_load_file(SUBSCRIPTION_FILE))) $xml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+if (!($wl = simplexml_load_file(WAITING_LIST_FILE))) $wl = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><data/>');
+if (!($eventsXml = simplexml_load_file(EVENT_FILE))) $eventsXml = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><events/>');
 
 //---------------------- Inscription, Désinscription et Waiting List
 // On vérifie si on a des données en POST ou en GET
@@ -171,14 +158,14 @@ if ($action) {
 		foreach ($xml->xpath("//insc[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-			saveXmlFile($xml, "data.xml");
+			saveXmlFile($xml, SUBSCRIPTION_FILE);
 		}
 		
 		// Suppression de la liste d'attente
 		foreach ($wl->xpath("//wl[@email='$GP_targetEmail' and @name='$GP_targetName' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-			$saveXmlFile($wl, "wl.xml");
+			$saveXmlFile($wl, WAITING_LIST_FILE);
 		}
 
 		traiterFileAttente($wl, $baseURL, $GP_eventID);
@@ -195,12 +182,12 @@ if ($action) {
 			'places' => $places,
 			'date' => $_POST['startDate'],
 			'titre' =>  $_POST['title'],
-			'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].' Europe/Paris')->getTimestamp(),
+			'timestamp' => \DateTime::createFromFormat('Y-m-d H:i T', $_POST['startDate'].' '.$_POST['startTime'].TIMEZONE)->getTimestamp(),
 			'' => $_POST['desc']
 		];
 		
 		addEvent($event, $eventsXml);
-		saveXmlFile($eventsXml, "events.xml");
+		saveXmlFile($eventsXml, EVENT_FILE);
 	} elseif ($action == "add") {
 		// Gestion de l'inscription à la séance
 		// Si on est sur un act ADD, alors on termine l'inscription
@@ -226,20 +213,20 @@ if ($action) {
 			$cs->addAttribute("name", $GP_name);
 			$cs->addAttribute("email", $GP_email);
 
-			saveXmlFile($xml, "data.xml");
+			saveXmlFile($xml, SUBSCRIPTION_FILE);
 
 			// On en profite pour se retirer de la waiting list le cas échéant
 			foreach ($wl->xpath("//wl[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 				$domRef = dom_import_simplexml($el);
 				$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-				saveXmlFile($wl, "wl.xml");
+				saveXmlFile($wl, WAITING_LIST_FILE);
 			}
 		}
 	} elseif ($action == "remove") { // Si on est sur un act REMOVE, alors on supprime le truc
 		foreach ($xml->xpath("//insc[ @email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-			saveXmlFile($xml, "data.xml");
+			saveXmlFile($xml, SUBSCRIPTION_FILE);
 		}
 
 		traiterFileAttente($wl, $baseURL, $GP_eventID);
@@ -249,7 +236,7 @@ if ($action) {
 		foreach ($wl->xpath("//wl[@email='$GP_email' and @name='$GP_name' and @id='$GP_eventID']") as $el) {
 			$domRef = dom_import_simplexml($el);
 			$domRef->parentNode->removeChild($domRef); // On supprime le child du parent pour retomber sur notre entrée
-			saveXmlFile($wl, "wl.xml");
+			saveXmlFile($wl, WAITING_LIST_FILE);
 		}
 	} elseif ($action == "waitingListAdd") {
 		// Si on est sur un act waitingListADD, alors on y go
@@ -269,7 +256,7 @@ if ($action) {
 			$cs->addAttribute("id", $GP_eventID);
 			$cs->addAttribute("name", $GP_name);
 			$cs->addAttribute("email", $GP_email);
-			saveXmlFile($wl, "wl.xml");
+			saveXmlFile($wl, WAITING_LIST_FILE);
 		}
 	} else {
 		http_response_code(400); // Set the HTTP status code to 400 Bad Request
@@ -286,7 +273,7 @@ if ($action) {
 $listFilters = []; // On prépare un array pour stocker les statuts des filtres
 $quickFilterList = []; // on utilise l'index pour identifier rapidement les filtres qui sont actifs lors du filtrage des évènements
 
-foreach ($arrayCategories as $key => $texte) {
+foreach (CATEGORIES as $key => $texte) {
 	$filtreActif = getByPostOrGet($key, '') == 'on' ? 1 : 0;
 	if($filtreActif) $quickFilterList[$key] = 1;
 	
@@ -298,7 +285,7 @@ foreach ($arrayCategories as $key => $texte) {
 	array_push($listFilters, $filter);
 }
 
-$fmt = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'Europe/Paris',IntlDateFormatter::GREGORIAN,'yyyy-MM-dd-HH-mm-eeee-MMMM');
+$fmt = new IntlDateFormatter( "fr_FR" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL, TIMEZONE,IntlDateFormatter::GREGORIAN,'yyyy-MM-dd-HH-mm-eeee-MMMM');
 $listCards = [];
 foreach ($eventsXml->event as $event) {
 	// Boucle qui passera chaque évènement en revue

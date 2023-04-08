@@ -2,8 +2,5 @@
 /smarty-4.3.0
 /smarty/cache
 /smarty/templates_c
-/last_exec.txt
-/events.xml
-/data.xml
-/wl.xml
 /admins.php
+/data/*
