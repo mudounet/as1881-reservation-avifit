@@ -7,7 +7,9 @@
 	$arraySeances		= array ("Dimanche" => "", "Lundi" => "1830", "Mardi" => "", "Mercredi" => "1830,1930", "Jeudi"=> "", "Vendredi" => "1830", "Samedi" =>"");// On liste les séances qu'on veut, on met les horaires au format HHmm, séparés par une "," , pour pouvoir les manipuler comme des nombres par la suite
 	$arrayAnimateur	= array ("Dimanche" => "", "Lundi" => "", "Mardi" => "", "Mercredi" => "JP", "Jeudi"=> "", "Vendredi" => "Fred", "Samedi" =>"");// On liste les animateurs des séances
 	$baseURL			= "https://dev.codeix.fr/as1881-avifit";
-	$arrayAdmin		= array ("Nom Exemple" => "Mail Exemple"); // Liste des admins et des mails associés avec comme format : "Nom" => "Email", séparé d'une virgule
+
+	$arrayAdmin = [];
+	include 'admins.php';
 	
 	//----------------------  Fonctions	& Pré-requis
 	function getBetweenDates($startDate, $endDate)
