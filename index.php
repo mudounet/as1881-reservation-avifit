@@ -38,9 +38,9 @@ $baseURL = "${protocol}://${domain}${disp_port}${base_url}";
 
 //----------------------  Fonctions	& Pré-requis
 function getByPostOrGet($property, $defaults) {
-	if (isset($property) && array_key_exists((string)$property, $_GET)) return $_GET[$property];
-	if (isset($property) && array_key_exists((string)$property, $_POST)) return $_POST[$property];
-	return $defaults;
+	if (isset($property) && array_key_exists((string)$property, $_GET)) return trim($_GET[$property]);
+	if (isset($property) && array_key_exists((string)$property, $_POST)) return trim($_POST[$property]);
+	return trim($defaults);
 }
 
 function traiterFileAttente($wl, $baseURL, $GP_eventID) {
