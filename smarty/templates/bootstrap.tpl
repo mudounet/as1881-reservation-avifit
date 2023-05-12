@@ -125,14 +125,13 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 </li>
 				{$last_month=$card.moisFR}{$last_year=$card.annee}{/if}
 				{if $last_day ne $card.dateJour}{$displayDate=true}{$last_day=$card.dateJour}{/if}
-			{if $card.categorie eq 'CAT_AFT'}
-{include file='bootstrap-seance-avifit.tpl'}
-			{elseif $card.categorie eq 'CAT_TNK'}
-{include file='bootstrap-seance-tank.tpl'}
-			{elseif $card.categorie eq 'CAT_CMT'}
-{include file='bootstrap-comite.tpl'}
-			{elseif $card.categorie eq 'CAT_ORG'}
-{include file='bootstrap-reunion-orga.tpl'}
+
+			{if $card.categorie eq 'CAT_AFT'}{include file='bootstrap-seance-avifit.tpl'}
+			{elseif $card.categorie eq 'CAT_AVR_LSR'}{include file='bootstrap-seance-aviron-loisir.tpl'}
+			{elseif $card.categorie eq 'CAT_TNK'}{include file='bootstrap-seance-tank.tpl'}
+			{elseif $card.categorie eq 'CAT_CMT'}{include file='bootstrap-comite.tpl'}
+			{elseif $card.categorie eq 'CAT_ORG'}{include file='bootstrap-reunion-orga.tpl'}
+
 			{else}
 			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>
 			{/if}

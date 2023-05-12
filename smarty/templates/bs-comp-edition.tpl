@@ -1,0 +1,1 @@
+{if $isAdmin}<div class="position-absolute top-0 end-0" style="padding:10px"><button type="button" class="btn btn-outline-light"data-bs-toggle="offcanvas" data-bs-target="#editEvent" aria-controls="editEvent" onclick="editEvent(this)" data-id="{$card.cardId}"><i class="bi bi-pencil-square"></i> Éditer</button></div>{/if}
