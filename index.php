@@ -316,6 +316,7 @@ foreach ($eventsXml->event as $event) {
 	
 	if((int)$event['time_end_sxb'] < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
 	$event_timestamp = (int)$event['time_start_sxb'];
+	$cardId = $event_timestamp.'-'.$event['autoId'];
 	
 	list($start_year, $start_month, $start_day, $start_hour, $start_minutes, $start_weekday, $start_monthName) = explode("-", $fmt->format($event_timestamp));
 	list(,,, $end_hour, $end_minutes,,) = explode("-", $fmt->format((int)$event['time_end_sxb']));
@@ -335,13 +336,8 @@ foreach ($eventsXml->event as $event) {
 	foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
 		if (isset($key) && $key != '') $card[$key] = $value;
 	}
-
-
-
-
+	
 	if (isset($event['places']) && (int)$event['places'] > 0) {
-		$cardId = $event_timestamp.'-'.$event['autoId'];
-		
 		// Gestion des inscrits
 		$listInscrits = []; // On reset la liste des inscrit
 		$inscMe = false; // On remet à false le fait d'être inscrit
@@ -369,13 +365,14 @@ foreach ($eventsXml->event as $event) {
 			}
 		}
 		
-		$card["cardId"] = $cardId;
 		$card["participantsMax"] = (int)$event['places'];
 		$card["listInscrits"] = $listInscrits;
 		$card["listAttenteInscrits"] = $wlInscrits;
 		$card["inscMe"] = $inscMe;
 		$card["wlMe"] = $wlMe;
 	}
+
+	$card["cardId"] = $cardId;
 
 	array_push($listCards, $card);
 }
