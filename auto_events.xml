@@ -7,9 +7,9 @@
 "CATEGORIE_EVTS_FESTIFS" => "evenements_festifs",
 "CATEGORIE_REUNIONS_ORGA" => "reunions_organisation",
 "CAT_AFT" => "seances_avifit",
-"CATEGORIE_SEANCES_TANKARAMER" => "seances_tank_a_ramer",
-"CATEGORIE_SEANCES_LOISIRS" => "seances_loisirs",
-"CATEGORIE_SEANCES_COMPETITION" => "seances_loisirs",
+"CAT_TNK" => "seances_tank_a_ramer",
+"CAT_AVR_LSR" => "seances_loisirs",
+"CAT_AVR_CMP" => "seances compétition",
  -->
 <events>
   <weekly_event autoId="TNK_MAR" categorie="CAT_TNK" valideDebut="2023-03-27" valideFin="2023-03-21" jour="mardi" heureDebut="17:00" heureFin="20:00" referent="Pierre"/>
@@ -18,4 +18,8 @@
   <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" jour="mercredi" heureDebut="18:00" heureFin="19:00" referent="JP" places="12"/>
   <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" jour="mercredi" heureDebut="19:00" heureFin="20:00" referent="JP" places="12"/>
   <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" jour="vendredi" heureDebut="18:30" heureFin="19:30" referent="Fred" places="12"/>
+  <weekly_event autoId="LSR_SAM" categorie="CAT_AVR_LSR" jour="samedi" heureDebut="9:00" heureFin="11:30" referent="Laurent"/>
+  <weekly_event autoId="LSR_DIM" categorie="CAT_AVR_LSR" jour="dimanche" heureDebut="9:00" heureFin="11:30" referent="Laurent"/>
+  <weekly_event autoId="LSR_MAR" categorie="CAT_AVR_LSR" jour="mardi" heureDebut="18:00" heureFin="19:30" referent="Laurent"/>
+  <weekly_event autoId="LSR_JEU" categorie="CAT_AVR_LSR" jour="jeudi" heureDebut="18:00" heureFin="19:30" referent="Laurent"/>
 </events>
