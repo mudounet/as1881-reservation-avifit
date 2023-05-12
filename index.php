@@ -314,9 +314,8 @@ foreach ($eventsXml->event as $event) {
 	
 	if (isset($event['categorie']) && array_key_exists((string)$event['categorie'], $quickFilterList)) continue; // L'evènement est filtré, donc on passe à la suite
 	
+	if((int)$event['time_end_sxb'] < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
 	$event_timestamp = (int)$event['time_start_sxb'];
-	
-	if($event_timestamp < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
 	
 	list($start_year, $start_month, $start_day, $start_hour, $start_minutes, $start_weekday, $start_monthName) = explode("-", $fmt->format($event_timestamp));
 	list(,,, $end_hour, $end_minutes,,) = explode("-", $fmt->format((int)$event['time_end_sxb']));
