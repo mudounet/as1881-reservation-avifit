@@ -41,4 +41,6 @@ class Smarty_Aviron extends Smarty {
    }
 
 }
+
+$smarty = new Smarty_Aviron();
 ?>

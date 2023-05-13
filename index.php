@@ -21,8 +21,6 @@ if ($last_exec === false || $current_time > (int)$last_exec + 43200) {
 	file_put_contents(LAST_EXEC_FILE, $current_time);
 }
 
-$smarty = new Smarty_Aviron();
-
 $protocol = empty($_SERVER["HTTPS"]) ? "http" : "https";
 $domain = $_SERVER["SERVER_NAME"];
 $port = $_SERVER["SERVER_PORT"];
