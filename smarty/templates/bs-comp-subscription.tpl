@@ -1,4 +1,5 @@
 {if isset($card.participantsMax)}
+{$inscFull=$card.participantsMax - count($card.listInscrits)}
 <div class="card-footer text-muted d-flex flex-row">
 	<div class="align-self-stretch flex-fill me-auto">
 	{if $card.listInscrits}
