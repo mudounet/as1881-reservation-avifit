@@ -4,6 +4,12 @@ require_once 'globals.php';
 require_once 'setup_smarty.php';
 require_once 'functions.php';
 
+$maintenance = false;
+if ($maintenance) {
+	$smarty->display("maintenance.tpl");
+	exit;
+}
+
 //---------------------- Paramètres	 /!\ Important
 $arrayAdmin = [];
 include 'admins.php';
