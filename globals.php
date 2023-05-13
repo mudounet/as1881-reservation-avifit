@@ -13,6 +13,7 @@ define('JOURS_FR' ,[
 
 define('LAST_EXEC_FILE', 'data/last_exec.txt');
 define('EVENT_FILE', 'data/list_events.xml');
+define('EVENT_ID_FILE', 'data/last_event_id.txt');
 define('WAITING_LIST_FILE', 'data/list_waiting.xml');
 define('SUBSCRIPTION_FILE', 'data/list_subscriptions.xml');
 

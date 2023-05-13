@@ -99,8 +99,10 @@ $action = getByPostOrGet('act', null);
 $participantsMaxId = null;
 if($GP_eventID) {
 	try {
-		if (!preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches)) throw new Exception("'$GP_eventID' Pas valide" );
-		$q = getEvent($eventsXml, $matches[1], $matches[2]); // On query uniquement le xml pour la date demandée
+		if (!preg_match('/^(\d+)$/', $GP_eventID, $matches)) throw new Exception("'$GP_eventID' Pas valide" );
+		$GP_eventID = (int)$GP_eventID;
+		$q = getEvent($eventsXml, $GP_eventID); // On query uniquement le xml pour la date demandée
+		
 		if(isset($q['places'])) $participantsMaxId = (int)$q['places'];
 	} catch (Exception $e) {
 		http_response_code(400); // Set the HTTP status code to 400 Bad Request
@@ -190,16 +192,15 @@ if ($action) {
 		unset($_POST['act']);
 		if(isset($_POST["CDATA"]) && $_POST["CDATA"] !=  '') $_POST[''] = $_POST["CDATA"];
 		
-		$event = getEvent($eventsXml, $_POST['time_start_sxb'], $_POST['autoId']);
+		$event = getEvent($eventsXml, $GP_eventID);
 		editEvent($eventsXml, $event, $_POST);
 		
 		// Redirect to the same page with the query string
 		header("Location: $baseURL$_SERVER[REQUEST_URI]");
 		exit;
 	} elseif ($action == 'event_get_raw' && $isAdmin) {
-		preg_match('/^(\d+)-([a-zA-Z0-9_]+)$/', $GP_eventID, $matches);
 		
-		$event = getEvent($eventsXml, $matches[1], $matches[2]); // On query uniquement le xml pour la date demandée
+		$event = getEvent($eventsXml, $GP_eventID); // On query uniquement le xml pour la date demandée
 		$result = [];
 		$result["CDATA"] = (string)$event; // pour récupérer CDATA
 		foreach( $event->attributes() as $key => $value) { // On parcourt chaque attribut
@@ -320,7 +321,7 @@ foreach ($eventsXml->event as $event) {
 	
 	if((int)$event['time_end_sxb'] < $current_time) continue; // La date de début est passée, on passe à la suite. TODO : utiliser la date de fin plutôt... 
 	$event_timestamp = (int)$event['time_start_sxb'];
-	$cardId = $event_timestamp.'-'.$event['autoId'];
+	$cardId = $event['id'];
 	
 	list($start_year, $start_month, $start_day, $start_hour, $start_minutes, $start_weekday, $start_monthName) = explode("-", $fmt->format($event_timestamp));
 	list(,,, $end_hour, $end_minutes,,) = explode("-", $fmt->format((int)$event['time_end_sxb']));
@@ -345,7 +346,7 @@ foreach ($eventsXml->event as $event) {
 		// Gestion des inscrits
 		$listInscrits = []; // On reset la liste des inscrit
 		$inscMe = false; // On remet à false le fait d'être inscrit
-		foreach ($xml->xpath("//insc[@id= '$cardId' ]") as $q) { // On query uniquement le xml pour la date demandée
+		foreach ($xml->xpath("//insc[@id= '$cardId' ]") as $q) { // On query uniquement le xml pour l'identifiant demandé
 			$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
 			if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
 				array_unshift($listInscrits, $inscrit); // Si on est inscrit on met en évidence son inscription et on permet de se désinscrire
@@ -358,7 +359,7 @@ foreach ($eventsXml->event as $event) {
 		// Gestion de la waiting list
 		$wlInscrits = []; // On reset la waiting list au cas où
 		$wlMe = false;
-		foreach ($wl->xpath("//wl[@id= '$cardId']") as $q) { // On query uniquement le xml pour la date demandée
+		foreach ($wl->xpath("//wl[@id= '$cardId']") as $q) { // On query uniquement le xml pour l'identifiant demandé
 			$inscrit = array('name' => $q["name"], 'email' => $q["email"]);
 			if ($q["name"] == $GP_name && $q["email"] == $GP_email) {
 				// Si on est présent dans la waiting list, on indique que le statut "wlMe" est true

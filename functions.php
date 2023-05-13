@@ -1,8 +1,35 @@
 <?php
 
-function getEvent($eventsXml, $timestamp, $category) {
-	$match = $eventsXml->xpath("//event[@autoId='$category' and @time_start_sxb='$timestamp']");// On query uniquement le xml pour la date demandée
-	if (count($match) == 0) $match = $eventsXml->xpath("//event[@categorie='$category' and @time_start_sxb='$timestamp']");// On query uniquement le xml pour la date demandée
+function getNewEventId() {
+	return _getNewId(EVENT_ID_FILE);
+}
+
+function _getNewId($filename) {
+	
+	if(file_exists($filename)) {
+		$fp = fopen($filename, "r+");
+		if (flock($fp, LOCK_EX)) { // acquière un verrou exclusif
+			$content = fread($fp, filesize($filename));
+			$id = (int)$content + 1;
+			rewind($fp); // Reset file pointer to beginning of file
+			ftruncate($fp, 0);
+			fwrite($fp, $id);
+			fflush($fp);            // libère le contenu avant d'enlever le verrou
+			flock($fp, LOCK_UN);    // Enlève le verrou
+		} else {
+			echo "Impossible de verrouiller le fichier !";
+		}
+		fclose($fp);
+	} else {
+		$id = 1;
+		file_put_contents($filename, $id);
+	}
+	
+	return $id;
+}
+
+function getEvent($eventsXml, $id) {
+	$match = $eventsXml->xpath("//event[@id='$id']");// On query uniquement le xml pour la date demandée
 		
 	if (count($match) == 1) return $match[0];
 	throw new Exception ("Nombre d'évènements récupéré invalide : ".count($match));
@@ -33,6 +60,8 @@ function addEvent($event, $eventsXml) {
 			$dom->appendChild($dom->ownerDocument->createCDATASection($value)); 
 		}
 	}
+	
+	$child->addAttribute('id', getNewEventId());
 }
 
 function generateTimeStamp($date, $time, $timezone) {
