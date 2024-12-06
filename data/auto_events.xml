@@ -11,17 +11,17 @@ Pour la liste des catégories, consulter/éditer le fichier globals.php
   <weekly_event autoId="LSR_JEU" categorie="CAT_AVR_LSR" jour="jeudi" valideDebut="2024-04-08" valideFin="2024-09-28" heureDebut="18:00" heureFin="19:30" referent="Laurent"/>
 
   <!-- Avifit été 2023 -->
-  <weekly_event autoId="AFT_MER" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-07-07" valideFin="2024-09-04" heureDebut="18:30" heureFin="19:30" referent="JP" places="12"/>
+  <weekly_event autoId="AFT_MER" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-07-07" valideFin="2024-09-04" heureDebut="18:30" heureFin="19:30" referent="JP" places_max="12"/>
 
   <!-- Avifit hiver 2024 -->
-  <weekly_event autoId="AFT_LUN" categorie="CAT_AFT" liste_attente="1" jour="lundi" valideDebut="2023-10-08" valideFin="2025-03-31" heureDebut="18:30" heureFin="19:30" places="12" referent="Delphine"/>
-  <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="18:00" heureFin="19:00" referent="JP" places="12"/>
-  <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="19:15" heureFin="20:15" referent="JP" places="12"/>
-  <weekly_event autoId="AFT_JEU" categorie="CAT_AFT" liste_attente="1" jour="jeudi" valideDebut="2023-09-04" valideFin="2025-12-01" heureDebut="12:30" heureFin="13:30" referent="Jean-Marc" places="12"/>
+  <weekly_event autoId="AFT_LUN" categorie="CAT_AFT" liste_attente="1" jour="lundi" valideDebut="2023-10-08" valideFin="2025-03-31" heureDebut="18:30" heureFin="19:30" places_max="12" referent="Delphine"/>
+  <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="18:00" heureFin="19:00" referent="JP" places_max="12"/>
+  <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="19:15" heureFin="20:15" referent="JP" places_max="12"/>
+  <weekly_event autoId="AFT_JEU" categorie="CAT_AFT" liste_attente="1" jour="jeudi" valideDebut="2023-09-04" valideFin="2025-12-01" heureDebut="12:30" heureFin="13:30" referent="Jean-Marc" places_min="3" places_max="12"/>
 
   
   <!-- Evènements permanents -->
-  <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" liste_attente="1" jour="vendredi" heureDebut="18:30" heureFin="19:30" referent="Marie-Pierre" places="12"/>
+  <weekly_event autoId="AFT_VEN" categorie="CAT_AFT" liste_attente="1" jour="vendredi" heureDebut="18:30" heureFin="19:30" referent="Marie-Pierre" places_max="12"/>
   <weekly_event autoId="LSR_SAM" categorie="CAT_AVR_LSR" jour="samedi" heureDebut="9:00" heureFin="11:30" referent="Laurent"/>
   <weekly_event autoId="LSR_DIM" categorie="CAT_AVR_LSR" jour="dimanche" heureDebut="9:00" heureFin="11:30" referent="Laurent"/>
   
