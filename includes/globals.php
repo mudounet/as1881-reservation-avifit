@@ -12,10 +12,7 @@ define('JOURS_FR' ,[
 ]);
 
 define('LAST_EXEC_FILE', 'data/last_exec.txt');
-define('EVENT_FILE', 'data/list_events.xml');
-define('EVENT_ID_FILE', 'data/last_event_id.txt');
-define('WAITING_LIST_FILE', 'data/list_waiting.xml');
-define('SUBSCRIPTION_FILE', 'data/list_subscriptions.xml');
+define('SQLITE_DB_PATH', 'data/database.sqlite');
 
 define('TIMEZONE', 'Europe/Paris');
 define('DAYS_FUTURE', 15);
@@ -27,7 +24,9 @@ define('CATEGORIES' ,[
 	"CAT_PRO" => "Séances compétition",
 	"CAT_LSR" => "Séances loisirs",
 	"CAT_CMT" => "Réunions du comité",
-	"CAT_ORG" => "Réunions d'organisations"
+	"CAT_ORG" => "Réunions d'organisations",
+	"CAT_EVT_CLB" => "Évènements du club",
+	"CAT_EVT_EXT" => "Évènements extérieurs au club",
 ]);
 
 

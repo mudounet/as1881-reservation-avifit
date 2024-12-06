@@ -13,6 +13,15 @@
 	--bd-teal-rgb: 32,201,151;
 	--docsearch-primary-color: var(--bd-violet);
 	--docsearch-logo-color: var(--bd-violet);
+	
+	--avifit-event-color: #FFFFFF;
+	--external-event-color: rgba(244, 240, 237, 1);
+	--club-event-color: rgba(244, 240, 237, 1);
+	--aviron-loisir-event-color-left: rgba(220,220,220,0.8);
+	--aviron-loisir-event-color-right: rgba(220,220,220,0.08);
+	--tank-a-ramer-event-color: rgba(220,220,220,0.8);
+	--comite-event-color: grey;
+	--organisation-event-color: orange;
 }
 
 body{
@@ -142,6 +151,41 @@ main {
 .today-event {
 	background-color:rgba(63.1%, 76.9%, 99.2%, 0.4) !important;
 	border-color:rgba(63.1%, 76.9%, 99.2%, 0.4) !important;
+}
+
+.external-event {
+	background-color: var(--external-event-color) !important;
+	border-color: var(--external-event-color) !important;
+}
+
+.club-event {
+	background-color: var(--club-event-color) !important;
+	border-color: var(--club-event-color) !important;
+}
+
+.avifit-event {
+	background-color: var(--avifit-event-color) !important;
+	border-color: var(--avifit-event-color) !important;
+}
+
+.aviron-loisir-event {
+	background: linear-gradient(to right, var(--aviron-loisir-event-color-left), var(--aviron-loisir-event-color-right)) !important;
+	border-color: var(--aviron-loisir-event-color-left) !important;
+}
+
+.tank-a-ramer-event {
+	background-color: var(--tank-a-ramer-event-color) !important;
+	border-color: var(--tank-a-ramer-event-color) !important;
+}
+
+.comite-event {
+	background-color: var(--comite-event-color) !important;
+	border-color: var(--comite-event-color) !important;
+}
+
+.organisation-event {
+	background-color: var(--organisation-event-color) !important;
+	border-color: var(--organisation-event-color) !important;
 }
 
 .cbp_tmtimeline>li .cbp_tmicon {

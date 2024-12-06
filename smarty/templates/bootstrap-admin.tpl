@@ -12,7 +12,7 @@ function editEvent(button) {
 
 	// Send the request to the server
 	$.ajax({
-		url: "{$loginURL}&id=" + id + "&act=event_get_raw",
+		url: "actions.php?id=" + id + "&act=event_get_raw",
 		success: function(response) {
 			// Change the button text and remove the spinner
 			
@@ -27,7 +27,11 @@ function editEvent(button) {
 				// Create label and input
 				
 				var label = $('<div class="mb-3"><label class="form-label"></label>').text(key);
-				var input = $('<input class="form-control"></input></div>').attr('name', key).attr('value', value);
+				if (key == 'CDATA') {
+					var input = $('<textarea class="form-control" rows="3"></textarea></div>').attr('name', key).val(value);
+				} else {
+					var input = $('<input class="form-control"></input></div>').attr('name', key).attr('value', value);
+				}
 
 				// Add label and input to form
 				form.append(label).append(input);
@@ -55,14 +59,14 @@ function editEvent(button) {
 		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 	</div>
 	<div class="offcanvas-body">
-		<form class="form" method="post" action="{$urlWithFilters}">
+		<form class="form" method="post" action="actions.php">
 			<div class="mb-3">
 				<label for="categorie" class="form-label">Catégorie:</label>
 
 				<select class="form-select" aria-label="Catégorie" name="cat" required>
 					<option selected value="">Sélectionner la catégorie</option>
-					{foreach $listFilters as $filter}
-					<option value="{$filter.categorie}">{$filter.text}</option>
+					{foreach $listCategories as $category}
+					<option value="{$category.textual_id}">{$category.description}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -80,11 +84,11 @@ function editEvent(button) {
 			</div>
 			<div class="mb-3">
 				<label for="endTime" class="form-label">Nombre de places minimum (-1 ou 0 = illimité):</label>
-				<input type="number" name="placesMin" disabled />
+				<input type="number" name="places_min"/>
 			</div>
 			<div class="mb-3">
 				<label for="endTime" class="form-label">Nombre de places maximum (-1 ou 0 = illimité):</label>
-				<input type="number" name="places" />
+				<input type="number" name="places_max" />
 			</div>
 			<div class="mb-3">
 				<label for="endTime" class="form-label">Personne(s) à contacter (avec des "," comme séparateur):</label>
@@ -110,7 +114,7 @@ function editEvent(button) {
 		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 	</div>
 	<div class="offcanvas-body" id="event-edit-body">
-		<form class="form" method="post" action="{$urlWithFilters}">
+		<form class="form" method="post" action="actions.php">
 			<div id="form-fields"></div>
 			<input type="hidden" name="act" value="event_edit" />
 			<input type="submit" value="Valider les informations" class="btn btn-primary" />

@@ -16,8 +16,6 @@
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 		<script>
-			history.replaceState('', 'AS1881 - Fil des évènements - {$GP_name}', ' {$loginURL} ');
-			
 			function sendRequest(button) {
 				// Get the button element
 				var button = $(button);
@@ -26,34 +24,10 @@
 
 				// Disable the button
 				button.prop('disabled', true);
-
-				// Add spinner to the button
-				button.html('<span class="spinner-border spinner-border-sm" role="status"></span> chargement...');
-
-				// Send the request to the server
-				$.ajax({
-					url: "{$loginURL}&id=" + id + "&act=" + operation,
-					success: function(response) {
-						// Change the button text and remove the spinner
-						button.html('Opération réussie');
-						button.removeClass('btn-primary').addClass('btn-success');
-						
-						$('#refresh_proposal').toast('show');
-					},
-					error: function(response) {
-						// Change the button text and remove the spinner
-						button.html(response.responseText);
-						button.removeClass('btn-primary').addClass('btn-danger');
-
-						// Enable the button after a delay
-						setTimeout(function() {
-							button.prop('disabled', false);
-							button.html('Réessayer');
-							button.removeClass('btn-danger').addClass('btn-primary');
-						}, 3000); // 3 seconds
-					}
-				});
-}
+				
+				window.location.href = "tunnel.php?id=" + id + "&act=" + operation;
+				return false;
+			}
 		</script>
 	</head>
 	<body>
@@ -67,6 +41,24 @@
 </div>
 {include file='bootstrap-header.tpl'}
 <main>
+<!-- Modal for information on how to connect -->
+<div class="modal fade" id="preLoginWarning" tabindex="-1" aria-labelledby="preLoginWarningLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="preLoginWarningLabel">Connexion requise</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vous devez être connectés pour terminer cette opération. Une fois connecté, il faudra rééssayer pour que l'action désirée soit prise en compte...</p>
+		<p>Pour votre information, l'icône pour se connecter est <strong>située en haut à droite</strong>...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Laissez-moi essayer</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="container">
 
 {if isset($error_user_message) or isset($error_wait_list_db_message) or isset($error_subscribe_db_message)}
@@ -85,25 +77,6 @@
   </div>
 </div>
 {else}
-			<div class="card container-fluid d-none">
-				<div class="form {$unlockStyle}" id="anchor-form">
-					<form action="{$urlWithFilters}" method="post">
-{if $GP_name}
-Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
-								Voici votre lien de connexion rapide, gardez-le en favoris :<br/> <a href="{$loginURL}">{$loginURL}</a><br/><br/>
-								<a href="{$baseURL}">Se déconnecter</a>
-{if $isAdmin}
-<br/><br/><b>Vous êtes administrateur ! Vous pouvez supprimer des personnes dans les listes</b> !
-{/if}
-{else}
-								<input name="name" placeholder="Nom" value="{$GP_name}" />
-								<input name="email" type="email" placeholder="E-mail" value="{$GP_email}"/>
-								<input type="submit" value="S'authentifier"/>
-{/if}					</form>
-<div class="control-panel">{$oneFilterActive=0}{foreach $listFilters as $filter}{if $filter.actif}{$oneFilterActive=$oneFilterActive+1}<a href="{$urlWithFilters}&{$filter.categorie}=" class="filter-hidden">{$filter.text}</a>{else}<a href="{$urlWithFilters}&{$filter.categorie}=hide" class="filter-shown">{$filter.text}</a>{/if}{/foreach}
-{if $oneFilterActive > 0}<a href="{$loginURL}" >Réinitialiser les {$oneFilterActive} filtre(s)</a>{/if}</div>
-				</div>
-			</div>
 			<div>
 <div class="row">
 <div class="col-md-10">
@@ -131,6 +104,8 @@ Bienvenue <b>{$GP_name}</b> ({$GP_email}) ! <br/> <br/>
 			{elseif $card.categorie eq 'CAT_TNK'}{include file='bootstrap-seance-tank.tpl'}
 			{elseif $card.categorie eq 'CAT_CMT'}{include file='bootstrap-comite.tpl'}
 			{elseif $card.categorie eq 'CAT_ORG'}{include file='bootstrap-reunion-orga.tpl'}
+			{elseif $card.categorie eq 'CAT_EVT_CLB'}{include file='bootstrap-evenement-club.tpl'}
+			{elseif $card.categorie eq 'CAT_EVT_EXT'}{include file='bootstrap-evenement-externe.tpl'}
 
 			{else}
 			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>

@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bd-navbar sticky-xl-top">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="#">
+		<a class="navbar-brand" href="{$serverURL}">
 			<img src="./img/logo-as1881.svg" height="50" aria-label="AS1881" alt="AS1881" />
 		</a>
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -11,9 +11,9 @@
 				<li class="nav-item">
 					{if $GP_name}
 					<p>Bienvenue <b>{$GP_name}</b> ({$GP_email}) !{if $isAdmin} <i class="bi bi-star-fill"></i>{/if}</p>
-					<p>Lien à enregistrer: <a href="{$loginURL}">{$loginURL}</a></p>
+					<p>Voici <a href="{$loginURL}">votre lien de connexion rapide</a>, gardez-le en favori... Lien <a href="/systeme.pdf">vers le fonctionnement du site</a></p>
 					{else}
-					<a class="nav-link active" aria-current="page" href="#">Fil des évènements de l'AS 1881</a>
+					<a class="nav-link active" aria-current="page" href="{$serverURL}">Fil des évènements de l'AS 1881</a>
 					{/if}
 				</li>
 			</ul>
@@ -43,7 +43,7 @@
 
 				<li class="nav-item">
 					{if $GP_name}
-					<a type="button" class="nav-link py-2 px-0 px-lg-2" aria-expanded="false" href="{$baseURL}">
+					<a type="button" class="nav-link py-2 px-0 px-lg-2" aria-expanded="false" href="{$serverURL}?logout">
 						<i class="bi bi-box-arrow-right"></i>
 						<span class="d-lg-none ms-2">Se déconnecter</span>
 					</a>
