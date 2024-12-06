@@ -18,6 +18,7 @@ Pour la liste des catégories, consulter/éditer le fichier globals.php
   <weekly_event autoId="AFT_MER1" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="18:00" heureFin="19:00" referent="JP" places_max="12"/>
   <weekly_event autoId="AFT_MER2" categorie="CAT_AFT" liste_attente="1" jour="mercredi" valideDebut="2024-09-04" valideFin="2025-07-07" heureDebut="19:15" heureFin="20:15" referent="JP" places_max="12"/>
   <weekly_event autoId="AFT_JEU" categorie="CAT_AFT" liste_attente="1" jour="jeudi" valideDebut="2023-09-04" valideFin="2025-12-01" heureDebut="12:30" heureFin="13:30" referent="Jean-Marc" places_min="3" places_max="12"/>
+  <weekly_event autoId="ERG_JEU" categorie="CAT_ERGOPLUS" liste_attente="1" jour="jeudi" valideDebut="2023-09-04" valideFin="2025-12-01" heureDebut="19:00" heureFin="20:00" referent="Laurent" places_max="14"/>
 
   
   <!-- Evènements permanents -->

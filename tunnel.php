@@ -16,7 +16,7 @@ try {
 
 	$event_min_places = $event['places_min'] > 0 ? (int)$event['places_min'] : null;
 	$event_max_places = $event['places_max'] > 0 ? (int)$event['places_max'] : null;
-	$is_avifit_event = $event['category_id'] == 1; // Seules les sessions d'avifit sont des évènements spéciaux
+	$is_tense_event = (bool) $event['tense_activity']; // Seules les sessions d'avifit sont des évènements spéciaux
 } catch (Exception $e) {
 	http_response_code(400); // Set the HTTP status code to 400 Bad Request
 	echo 'id invalide : '.$e->getMessage();
@@ -29,15 +29,15 @@ switch ($action) {
         $main_message = "Conditions d'utilisation";
 		
 		$list_conditions[] = "contrôler que l'évènement n'a pas été annulé en dernière minute";
-		if ($is_avifit_event) $list_conditions[] = "accepter l'inscription automatique jusqu'à 24h à l'avance";
+		if ($is_tense_event) $list_conditions[] = "accepter l'inscription automatique jusqu'à 24h à l'avance";
 		$list_conditions[] = "se désinscrire dès qu'il y a un risque d'indisponibilité";
-		if ($is_avifit_event) $list_conditions[] = "être présent⸱e à la séance, sous peine de sanction";
+		if ($is_tense_event) $list_conditions[] = "être présent⸱e à la séance, sous peine de sanction";
 		$button_message = "J'ai compris, m'inscrire";
         break;
     case 'remove':
         $main_message = "Vous vous engagez à";
-		if ($is_avifit_event) {
-			$list_conditions[] = "prévenir le groupe WhatsApp consacré à l'Avifit";
+		if ($is_tense_event) {
+			$list_conditions[] = "prévenir le groupe WhatsApp dédié à l'évènement";
 		} else {
 			$list_conditions[] = "prévenir l'organisateur, dans la mesure du possible";
 		}

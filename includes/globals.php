@@ -22,11 +22,12 @@ define('CATEGORIES' ,[
 	"CAT_AFT" => "Avifit",
 	"CAT_TNK" => "Tank à ramer",
 	"CAT_PRO" => "Séances compétition",
-	"CAT_LSR" => "Séances loisirs",
+	"CAT_AVR_LSR" => "Séances aviron loisirs",
 	"CAT_CMT" => "Réunions du comité",
 	"CAT_ORG" => "Réunions d'organisations",
 	"CAT_EVT_CLB" => "Évènements du club",
 	"CAT_EVT_EXT" => "Évènements extérieurs au club",
+	"CAT_ERGOPLUS" => "Ergomètre sportif",
 ]);
 
 

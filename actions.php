@@ -31,7 +31,7 @@ if($GP_eventID) {
 
 		$event_min_places = $event['places_min'] > 0 ? (int)$event['places_min'] : null;
 		$event_max_places = $event['places_max'] > 0 ? (int)$event['places_max'] : null;
-		$is_tensed_event = $event['category_id'] == 1; // Seules les sessions d'avifit sont des évènements spéciaux
+		$is_tensed_event = (bool)$event['tense_activity']; // Seules les sessions d'avifit sont des évènements spéciaux
 		
 		
 		
