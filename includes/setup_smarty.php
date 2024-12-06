@@ -3,11 +3,13 @@
 
 // hack version example that works on both *nix and windows
 // Smarty is assumend to be in 'includes/' dir under current script
-define('SMARTY_DIR',str_replace("\\","/",getcwd()).'/smarty-4.3.0/libs/');
+define('SMARTY_DIR',str_replace("\\","/",getcwd()).'/smarty-5.4.2/libs/');
 
 define('CFG_DIR_ROOT',str_replace("\\","/",getcwd()).'/smarty/');
 
 require_once(SMARTY_DIR . 'Smarty.class.php');
+
+use Smarty\Smarty;
 
 // The setup.php file is a good place to load
 // required application library files, and you

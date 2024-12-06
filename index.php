@@ -63,7 +63,7 @@ $script_name = preg_replace('/^'.preg_quote($_SERVER["DOCUMENT_ROOT"], '/').'/',
 $script_name = str_replace('\\', '/', $script_name);
 
 // put em all together to get the complete base URL
-$server_url = "${protocol}://${domain}${disp_port}";
+$server_url = "{$protocol}://{$domain}{$disp_port}";
 
 //---------------------- Chargement de la BDD, toutes les requetes peuvent utiliser cette variable pour charger la bdd
 $database = connectToDatabase();

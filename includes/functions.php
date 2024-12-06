@@ -28,6 +28,7 @@ function login(PDO $database, $user, $email) {
 function getByPostOrGet($property, $defaults) {
 	if (isset($property) && array_key_exists((string)$property, $_GET)) return trim($_GET[$property]);
 	if (isset($property) && array_key_exists((string)$property, $_POST)) return trim($_POST[$property]);
+	if ($defaults == null) return null;
 	return trim($defaults);
 }
 

@@ -1,6 +1,3 @@
-/php-7.4.33
-/smarty-4.3.0
-/smarty/cache
+/smarty-5.4.2
 /smarty/templates_c
-/admins.php
-/data/*
+/data
