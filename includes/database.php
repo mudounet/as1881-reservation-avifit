@@ -41,6 +41,9 @@ function connectToDatabase() {
 // Function to create the "users" table if it doesn't exist
 function createTables(PDO $database) {
 	try {
+		$database->exec("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER)");
+		$database->exec("INSERT INTO schema_version (version) VALUES (1)");
+		
 		$createCategoriesTable = 'CREATE TABLE IF NOT EXISTS "categories" (
 			"id"	INTEGER,
 			"textual_id" TEXT NOT NULL UNIQUE,
@@ -94,6 +97,9 @@ function createTables(PDO $database) {
 	} catch (PDOException $e) {
 		echo "Error: " . $e->getMessage();
 	}
+	
+	require_once('manual_db_upgrade.php');
+	performDbUpgrade();
 }
 
 // Create a category
@@ -124,10 +130,10 @@ function getAllCategories(PDO $database, int $timestamp) {
 	return _getWithQuery($database, 'SELECT DISTINCT * FROM categories ORDER BY id', False);
 }
 
-function createEvent(PDO $database, $ts_start, $ts_end, $title, $description, string $category_text, $referee, $auto_id, $places_min, $places_max, $desactivation_txt, $submitter_id) {
+function createEvent(PDO $database, $ts_start, $ts_end, $title, $description, string $category_text, $referee, $auto_id, $places_min, $places_max, $desactivation_txt, $submitter_id, bool $tense_activity) {
 	try {
 		
-		$query = 'INSERT INTO events ("ts_sxb_start", "ts_sxb_end", "title", "description", "category_id", "referee", "category_auto", "places_min", "places_max", "disactivation_text", "submitter_id") VALUES (:ts_start, :ts_end, :title, :description, (SELECT id from categories WHERE textual_id = :category_text LIMIT 1), :referee, :cat_auto, :places_min, :places_max, :desactivation_txt, :submitter_id);';
+		$query = 'INSERT INTO events ("ts_sxb_start", "ts_sxb_end", "title", "description", "category_id", "referee", "category_auto", "places_min", "places_max", "disactivation_text", "submitter_id", "tense_activity") VALUES (:ts_start, :ts_end, :title, :description, (SELECT id from categories WHERE textual_id = :category_text LIMIT 1), :referee, :cat_auto, :places_min, :places_max, :desactivation_txt, :submitter_id, :tense_activity);';
 		$statement = $database->prepare($query);
 		
 		$statement->bindValue('ts_start', $ts_start, PDO::PARAM_INT);
@@ -141,6 +147,7 @@ function createEvent(PDO $database, $ts_start, $ts_end, $title, $description, st
 		$statement->bindValue('places_max', $places_max, PDO::PARAM_INT);
 		$statement->bindValue('desactivation_txt', $desactivation_txt, PDO::PARAM_STR);
 		$statement->bindValue('submitter_id', $submitter_id, PDO::PARAM_INT);
+		$statement->bindValue('tense_activity', $tense_activity, PDO::PARAM_BOOL);
 		
 		$statement->execute();
 		return $database->lastInsertId();

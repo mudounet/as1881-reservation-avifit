@@ -79,7 +79,8 @@ function generateAutoEvents($startTimestamp, $endTimestamp) {
 				null, // Places mini
 				isset($auto_event['places']) ? (int)$auto_event['places'] : null, // Places max
 				null,
-				1 // 1 is the identifier of the AUTO user
+				1, // 1 is the identifier of the AUTO user,
+				isset($auto_event['liste_attente']) ? (bool)$auto_event['liste_attente'] : false
 				);
 		}
 	}
