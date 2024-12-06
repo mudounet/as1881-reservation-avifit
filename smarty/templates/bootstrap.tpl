@@ -98,18 +98,9 @@
 </li>
 				{$last_month=$card.moisFR}{$last_year=$card.annee}{/if}
 				{if $last_day ne $card.dateJour}{$displayDate=true}{$last_day=$card.dateJour}{/if}
-
-			{if $card.categorie eq 'CAT_AFT'}{include file='bootstrap-seance-avifit.tpl'}
-			{elseif $card.categorie eq 'CAT_AVR_LSR'}{include file='bootstrap-seance-aviron-loisir.tpl'}
-			{elseif $card.categorie eq 'CAT_TNK'}{include file='bootstrap-seance-tank.tpl'}
-			{elseif $card.categorie eq 'CAT_CMT'}{include file='bootstrap-comite.tpl'}
-			{elseif $card.categorie eq 'CAT_ORG'}{include file='bootstrap-reunion-orga.tpl'}
-			{elseif $card.categorie eq 'CAT_EVT_CLB'}{include file='bootstrap-evenement-club.tpl'}
-			{elseif $card.categorie eq 'CAT_EVT_EXT'}{include file='bootstrap-evenement-externe.tpl'}
-
-			{else}
-			<div class="alert alert-danger" role="alert">La catégorie suivante est inconnue du template : {$card.categorie}. Merci de signaler cette erreur afin que l'on puisse la corriger pour la prochaine fois...</div>
-			{/if}
+			
+			{include file="bootstrap-{$card.categorie}.tpl"}
+			
 			{foreachelse}
 			<div>Les filtres sont trop restrictifs : il n'y a rien à afficher.</div>
 			{/foreach}

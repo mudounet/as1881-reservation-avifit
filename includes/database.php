@@ -9,14 +9,10 @@ try {
 	$database = connectToDatabase();
 	if ($databaseWillBeCreated) {
 		createTables($database);
-		createCategory($database, 'CAT_AFT', 'Avifit');
-		createCategory($database, 'CAT_TNK', 'Tank à ramer');
-		createCategory($database, 'CAT_AVR_PRO', 'Séances compétition');
-		createCategory($database, 'CAT_AVR_LSR', 'Séances loisirs');
-		createCategory($database, 'CAT_CMT', 'Réunions du comité');
-		createCategory($database, 'CAT_ORG', "Réunions d'organisations");
-		createCategory($database, 'CAT_EVT_CLB', 'Évènements du club');
-		createCategory($database, 'CAT_EVT_EXT', 'Évènements extérieurs au club');
+		
+		foreach (CATEGORIES as $cat_key => $description) {
+			createCategory($database, $cat_key, $description);
+		}
 		getUser($database, "AUTO_EVENT", "a00oisxf5pgi7wx16tpcsgf35ilmm335e0@miauou.net");
 		echo "Database initialised. Please reload page...";
 		exit;
