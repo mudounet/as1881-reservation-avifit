@@ -18,7 +18,7 @@ try {
 		exit;
 	}
 } catch (PDOException $e) {
-	echo "Error: " . $e->getMessage();
+	echo "Error while creating database: " . $e->getMessage();
 	exit;
 }
 
@@ -29,7 +29,7 @@ function connectToDatabase() {
 		$database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		return $database;
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error connectToDatabase(): " . $e->getMessage();
 		return null;
 	}
 }
@@ -91,7 +91,7 @@ function createTables(PDO $database) {
 			)';
 		$database->exec($createSubscriptionTable);
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error createTables(): " . $e->getMessage();
 	}
 	
 	require_once('manual_db_upgrade.php');
@@ -106,7 +106,7 @@ function createCategory(PDO $database, $textual_id, $description) {
 		$statement->execute([$textual_id, $description]);
 		return $database->lastInsertId();
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error createCategory(): " . $e->getMessage();
 		return false;
 	}
 }
@@ -148,7 +148,7 @@ function createEvent(PDO $database, $ts_start, $ts_end, $title, $description, st
 		$statement->execute();
 		return $database->lastInsertId();
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error createEvent(): " . $e->getMessage();
 		print $category_text;
 		return false;
 	}
@@ -189,7 +189,7 @@ function updateEvent(PDO $database, $event_id, $ts_start, $ts_end, $title, $desc
 		$statement->execute();
 		return true;
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error updateEvent(): " . $e->getMessage();
 		echo "Query: ".$statement->queryString;
 		return false;
 	}
@@ -232,7 +232,7 @@ function _getWithQuery(PDO $database, $query, $oneResult) {
 			return [];
 		}
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error _getWithQuery(): " . $e->getMessage();
 		return [];
 	}
 }
@@ -241,7 +241,7 @@ function _exec_query(PDO $database, $query) {
 	try {
 		return $database->exec($query);
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error _exec_query(): " . $e->getMessage();
 		return false;
 	}
 }
@@ -282,7 +282,7 @@ function getUser(PDO $dbh, $display_name, $email) {
 
 		return $userData;
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo "Error getUser(): " . $e->getMessage();
 		return [];
 	}
 }
