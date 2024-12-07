@@ -6,7 +6,8 @@
 {include file='bs-comp-edition.tpl'}
   <div class="card-body">
   <h5 class="card-title"><span class="badge bg-secondary">Officiel</span> Séance d'ergomètre sportif</h5>{if $card.referee ne ''}<h6 class="card-subtitle mb-2 text-muted">Animée par <b>{$card.referee}</b></h6>{/if}
-    <p>Cette séance est réservée aux titulaires de plouf.</p>
+    <p>Séance réservée aux titulaires d'une licence A (Aviron).</p>
+	<p>Bonne condition physique recommandée..</p>
 	<p>Il est important de réserver sa place, de s'engager à venir, et de prévenir sur le groupe WhatsApp en cas d'impossibilité de dernière minute.</p>
 </div>
 {include file='bs-comp-subscription.tpl'}
