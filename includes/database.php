@@ -170,9 +170,9 @@ function nullify($str) {
 	return $str === '' ? null : $str; 
 }
 
-function updateEvent(PDO $database, $event_id, $ts_start, $ts_end, $title, $description, $category_id, $referee, $places_min, $places_max, $disactivation_txt) {
+function updateEvent(PDO $database, int $event_id, int $ts_start, int $ts_end, string $title, string $description, int $category_id, $referee, int $places_min, int $places_max, string $disactivation_txt, bool $tense_activity) {
 	try {
-		$query = 'UPDATE events SET	ts_sxb_start = :ts_start, ts_sxb_end = :ts_end, title = :title, description = :description, category_id = :category_id, referee = :referee, places_min = :places_min, places_max = :places_max, disactivation_text = :disactivation_txt WHERE id = :event_id';
+		$query = 'UPDATE events SET	ts_sxb_start = :ts_start, ts_sxb_end = :ts_end, title = :title, description = :description, category_id = :category_id, referee = :referee, places_min = :places_min, places_max = :places_max, disactivation_text = :disactivation_txt, tense_activity = :tense_activity WHERE id = :event_id';
 		$statement = $database->prepare($query);
 		
 		$statement->bindValue('event_id', $event_id, PDO::PARAM_INT);
@@ -185,6 +185,7 @@ function updateEvent(PDO $database, $event_id, $ts_start, $ts_end, $title, $desc
 		$statement->bindValue('places_min', nullify($places_min), PDO::PARAM_INT);
 		$statement->bindValue('places_max', nullify($places_max), PDO::PARAM_INT);
 		$statement->bindValue('disactivation_txt', nullify($disactivation_txt), PDO::PARAM_STR);
+		$statement->bindValue('tense_activity', nullify($tense_activity), PDO::PARAM_BOOL);
 		
 		$statement->execute();
 		return true;

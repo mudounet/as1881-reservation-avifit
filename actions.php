@@ -77,12 +77,14 @@ if ($action) {
 				getByPostOrGet('places_min', null),
 				getByPostOrGet('places_max', null),
 				null, // Desactivation
-				$_SESSION["logged_user"]['id']);
+				$_SESSION["logged_user"]['id'],
+				getByPostOrGet('tense_activity', false),
+			);
 				
 			// Redirect to the same page with the query string
 			redirect_to_main_page($GP_eventID);
 		} elseif ($action == 'event_edit' && $isAdmin) {
-			updateEvent($database, $GP_eventID, $_POST['ts_sxb_start'], $_POST['ts_sxb_end'], $_POST['title'], $_POST['description'], $_POST['category_id'], $_POST['referee'], $_POST['places_min'], $_POST['places_max'], $_POST['disactivation_text']);
+			updateEvent($database, $GP_eventID, $_POST['ts_sxb_start'], $_POST['ts_sxb_end'], $_POST['title'], $_POST['description'], $_POST['category_id'], $_POST['referee'], $_POST['places_min'], $_POST['places_max'], $_POST['disactivation_text'], $_POST['tense_activity']);
 			
 			// Redirect to the same page with the query string
 			redirect_to_main_page($GP_eventID);

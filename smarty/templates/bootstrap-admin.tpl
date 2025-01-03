@@ -83,16 +83,20 @@ function editEvent(button) {
 				<input type="time" name="endTime" required />
 			</div>
 			<div class="mb-3">
-				<label for="endTime" class="form-label">Nombre de places minimum (-1 ou 0 = illimité):</label>
+				<label for="places_min" class="form-label">Nombre de places minimum (-1 ou 0 = illimité):</label>
 				<input type="number" name="places_min"/>
 			</div>
 			<div class="mb-3">
-				<label for="endTime" class="form-label">Nombre de places maximum (-1 ou 0 = illimité):</label>
+				<label for="places_max" class="form-label">Nombre de places maximum (-1 ou 0 = illimité):</label>
 				<input type="number" name="places_max" />
 			</div>
 			<div class="mb-3">
-				<label for="endTime" class="form-label">Personne(s) à contacter (avec des "," comme séparateur):</label>
+				<label for="referee" class="form-label">Personne(s) à contacter (avec des "," comme séparateur):</label>
 				<input type="text" name="referee" />
+			</div>
+			<div class="mb-3">
+				<label for="attente" class="form-label">Liste d'attente:</label>
+				<input type="checkbox" name="tense_activity" />
 			</div>
 			<div class="mb-3">
 				<label for="exampleFormControlInput1" class="form-label">Titre de l'évènement</label>
