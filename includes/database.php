@@ -154,6 +154,32 @@ function createEvent(PDO $database, $ts_start, $ts_end, $title, $description, st
 	}
 }
 
+function deleteEvent(PDO $database, int $id) {
+    try {
+        // Begin the transaction
+        $database->beginTransaction();
+
+        // Prepare and execute the first query
+        $stmt1 = $database->prepare('DELETE FROM subscriptions WHERE event_id = :id');
+        $stmt1->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt1->execute();
+
+        // Prepare and execute the second query
+        $stmt2 = $database->prepare('DELETE FROM events WHERE id = :id');
+        $stmt2->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt2->execute();
+
+        // Commit the transaction
+        $database->commit();
+        return true;
+    } catch (PDOException $e) {
+        // Rollback the transaction in case of an error
+        $database->rollBack();
+        echo "Error deleteEvent(): " . $e->getMessage();
+        return false;
+    }
+}
+
 function getEvent(PDO $database, $id) {
 	return _getWithQuery($database, 'SELECT * FROM events WHERE id='.$id.' LIMIT 1', True);
 }
@@ -170,8 +196,13 @@ function nullify($str) {
 	return $str === '' ? null : $str; 
 }
 
-function updateEvent(PDO $database, int $event_id, int $ts_start, int $ts_end, string $title, string $description, int $category_id, $referee, int $places_min, int $places_max, string $disactivation_txt, bool $tense_activity) {
+function updateEvent(PDO $database, int $event_id, int $ts_start, int $ts_end, string $title, string $description, int $category_id, $referee, $places_min, $places_max, string $disactivation_txt, $tense_activity) {
 	try {
+		
+		if ($disactivation_txt === 'DELETE') {
+			return deleteEvent($database, $event_id);
+		}
+		
 		$query = 'UPDATE events SET	ts_sxb_start = :ts_start, ts_sxb_end = :ts_end, title = :title, description = :description, category_id = :category_id, referee = :referee, places_min = :places_min, places_max = :places_max, disactivation_text = :disactivation_txt, tense_activity = :tense_activity WHERE id = :event_id';
 		$statement = $database->prepare($query);
 		
