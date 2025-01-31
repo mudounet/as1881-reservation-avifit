@@ -10,7 +10,7 @@
 <div class="col-9">
 
 <p>Le centre nautique se trouve au 9 rue de Turenne, 67300 Schiltigheim, France. Le tank à ramer se trouve immédiatement à droite après être entré.</p>
-<p>Important : prévenir <b>{if $card.referee ne ''}{$card.referee}{else}???{/if}</b> en cas d'arrivée après 19h.</p>
+<p><b>Important :</b> prévenir <b>{if $card.referee ne ''}{$card.referee}{else}???{/if}</b> si vous voulez arriver entre une heure avant {$card.heureFin} et {$card.heureFin} (fin de la séance).</p>
 </div>
 <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=7.728305160999299%2C48.61171777423268%2C7.730606496334077%2C48.613001674268446&amp;layer=mapnik&amp;marker=48.61235972833147%2C7.729455828666687" frameborder="0" class="rounded col-3" allowfullscreen=""></iframe>
 </div>

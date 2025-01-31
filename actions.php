@@ -78,7 +78,7 @@ if ($action) {
 				getByPostOrGet('places_max', null),
 				null, // Desactivation
 				$_SESSION["logged_user"]['id'],
-				getByPostOrGet('tense_activity', false),
+				(bool)getByPostOrGet('tense_activity', false),
 			);
 				
 			// Redirect to the same page with the query string
